@@ -483,12 +483,12 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
   <!-- eufyLife体重スクショ読み取り -->
   <div class="card">
     <div class="stitle">eufyLife 体重データ読み取り</div>
-    <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6">eufyLifeアプリの計測結果画面のスクリーンショットから、体重・体脂肪率などを自動で読み取って記録します。</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6">eufyLifeの計測結果画面のスクリーンショットから体重・体脂肪率などを自動読み取りします。</div>
     <div style="background:#EDE7F6;border-radius:12px;padding:10px;margin-bottom:12px;font-size:11px;color:#6366F1;line-height:1.8;font-weight:700">
-      📱 手順：eufyLifeアプリ → 計測結果画面 → iPhoneでスクリーンショット撮影 → 下のボタンでアップロード
+      手順：eufyLifeで計測 → 結果画面でスクリーンショット → 下のボタンで選択
     </div>
     <div onclick="triggerEufy()" style="border:2px dashed rgba(99,102,241,0.3);border-radius:16px;padding:24px;text-align:center;cursor:pointer;background:#F5F3FF;margin-bottom:12px">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px;display:block"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px;display:block"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
       <div style="font-size:14px;font-weight:800;color:#6366F1">スクリーンショットを選ぶ</div>
       <div style="font-size:11px;color:#A855F7;margin-top:4px">eufyLifeの計測結果画面</div>
     </div>
@@ -1116,14 +1116,18 @@ async function analyzePhoto(event){
     const base64=e.target.result.split(',')[1];
     const mimeType=file.type;
 
+    // 前回の結果・エラーを完全にリセット
     document.getElementById('photo-preview').src=e.target.result;
     document.getElementById('photo-preview-wrap').style.display='block';
     document.getElementById('ai-result-wrap').style.display='block';
     document.getElementById('ai-result-title').textContent='AI解析中...';
+    document.getElementById('ai-result-title').style.color='#333';
     document.getElementById('ai-loading-icon').style.display='block';
     document.getElementById('ai-foods-list').innerHTML='';
     document.getElementById('ai-total-row').style.display='none';
     document.getElementById('ai-add-wrap').style.display='none';
+    document.getElementById('ai-total-kcal').textContent='— kcal';
+    lastAiResult=null;
 
     try {
       const prompt=`この料理の写真を見て、含まれている食材・料理を特定し、それぞれのカロリーを推定してください。
@@ -1178,7 +1182,20 @@ async function analyzePhoto(event){
     } catch(err){
       document.getElementById('ai-loading-icon').style.display='none';
       document.getElementById('ai-result-title').textContent='エラーが発生しました';
-      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:13px;padding:8px">${err.message}<br><span style="color:#888;font-size:11px">APIキーを確認してください。</span></div>`;
+      document.getElementById('ai-result-title').style.color='#FF6B6B';
+      // エラー時は前回の成功結果を隠す
+      document.getElementById('ai-total-row').style.display='none';
+      document.getElementById('ai-add-wrap').style.display='none';
+      const msg=err.message||'不明なエラー';
+      let hint='';
+      if(msg.includes('quota')||msg.includes('exceeded')||msg.includes('RESOURCE_EXHAUSTED')){
+        hint='<br><br><b>対処法：</b><br>①新しいプロジェクトでAPIキーを再発行<br>　→ aistudio.google.com で「Create API key in new project」<br>② Google Cloud Consoleで請求を有効化する';
+      } else if(msg.includes('not found')||msg.includes('not supported')){
+        hint='<br><br><b>対処法：</b><br>APIキーが正しく設定されているか確認してください。';
+      } else if(msg.includes('API_KEY_INVALID')||msg.includes('invalid')){
+        hint='<br><br><b>対処法：</b><br>APIキーが無効です。AI解析タブで正しいキーを再設定してください。';
+      }
+      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:12px;padding:8px;line-height:1.7">${msg}${hint}</div>`;
     }
   };
   reader.readAsDataURL(file);
@@ -1216,24 +1233,19 @@ function updateAiHistory(){
 
 // 公開
 // ========== eufy体重スクショ読み取り ==========
-let lastEufyResult = null;
-
+let lastEufyResult=null;
 function triggerEufy(){
   const key=localStorage.getItem('geminiKey');
   if(!key){ alert('先にGemini APIキーを設定してください。'); return; }
   document.getElementById('eufy-input').click();
 }
-
 async function analyzeEufy(event){
   const file=event.target.files[0]; if(!file) return;
-  const key=localStorage.getItem('geminiKey'); if(!key){ alert('APIキーが設定されていません。'); return; }
-
+  const key=localStorage.getItem('geminiKey'); if(!key) return;
   const reader=new FileReader();
   reader.onload=async(e)=>{
     const base64=e.target.result.split(',')[1];
     const mimeType=file.type;
-
-    // リセット
     document.getElementById('eufy-preview').src=e.target.result;
     document.getElementById('eufy-preview-wrap').style.display='block';
     document.getElementById('eufy-result-wrap').style.display='block';
@@ -1243,263 +1255,57 @@ async function analyzeEufy(event){
     document.getElementById('eufy-data-list').innerHTML='';
     document.getElementById('eufy-save-wrap').style.display='none';
     lastEufyResult=null;
-
     try {
-      const prompt=`このeufyLife（またはスマート体重計）のアプリの計測結果画面のスクリーンショットから、表示されているすべての数値を読み取ってください。
-以下のJSON形式のみで回答してください（存在しない項目はnullにしてください）：
-{"weight":体重kg数値,"bodyFat":体脂肪率%数値,"bmi":BMI数値,"muscleMass":筋肉量kg数値,"boneMass":骨量kg数値,"water":体水分率%数値,"bmr":基礎代謝kcal数値,"visceralFat":内臓脂肪レベル数値,"bodyAge":体年齢数値,"measureDate":"計測日時文字列またはnull"}`;
-
+      const prompt=`このスマート体重計アプリの計測結果画面から数値を読み取ってください。以下のJSON形式のみで回答（存在しない項目はnull）：{"weight":体重kg,"bodyFat":体脂肪率%,"bmi":BMI,"muscleMass":筋肉量kg,"boneMass":骨量kg,"water":体水分率%,"bmr":基礎代謝kcal,"visceralFat":内臓脂肪レベル,"bodyAge":体年齢}`;
       const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          contents:[{parts:[
-            {inline_data:{mime_type:mimeType,data:base64}},
-            {text:prompt}
-          ]}],
-          generationConfig:{temperature:0.1,maxOutputTokens:500}
-        })
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mimeType,data:base64}},{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:300}})
       });
-
       const data=await res.json();
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text){ throw new Error(data.error?.message||'APIから結果が返りませんでした'); }
-
+      if(!text) throw new Error(data.error?.message||'読み取れませんでした');
       let clean=text.replace(/```json|```/g,'').trim();
-      const jsonStart=clean.indexOf('{'), jsonEnd=clean.lastIndexOf('}');
-      if(jsonStart===-1||jsonEnd===-1) throw new Error('スクリーンショットから数値を読み取れませんでした。');
-      clean=clean.slice(jsonStart,jsonEnd+1);
-      let result;
-      try{ result=JSON.parse(clean); }
-      catch(e){ throw new Error('読み取り結果の解析に失敗しました。'); }
-
+      const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
+      if(js===-1||je===-1) throw new Error('数値を読み取れませんでした');
+      const result=JSON.parse(clean.slice(js,je+1));
       lastEufyResult=result;
       document.getElementById('eufy-loading-icon').style.display='none';
       document.getElementById('eufy-result-title').textContent='読み取り完了 ✨';
-
-      // 結果表示
-      const labels={
-        weight:{label:'体重',unit:'kg',color:'#FF6B6B'},
-        bodyFat:{label:'体脂肪率',unit:'%',color:'#FF8E53'},
-        bmi:{label:'BMI',unit:'',color:'#FEC85B'},
-        muscleMass:{label:'筋肉量',unit:'kg',color:'#4ECDC4'},
-        boneMass:{label:'骨量',unit:'kg',color:'#45B7D1'},
-        water:{label:'体水分率',unit:'%',color:'#378ADD'},
-        bmr:{label:'基礎代謝',unit:'kcal',color:'#A855F7'},
-        visceralFat:{label:'内臓脂肪レベル',unit:'',color:'#FF6B6B'},
-        bodyAge:{label:'体年齢',unit:'歳',color:'#1D9E75'},
-      };
-
-      let html='';
-      let hasData=false;
-      Object.entries(labels).forEach(([key,info])=>{
-        if(result[key]!==null&&result[key]!==undefined){
-          hasData=true;
-          html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px">
-            <span style="color:#555;font-weight:600">${info.label}</span>
-            <span style="font-weight:800;color:${info.color}">${result[key]}${info.unit}</span>
-          </div>`;
-        }
+      const labels={weight:{l:'体重',u:'kg',c:'#FF6B6B'},bodyFat:{l:'体脂肪率',u:'%',c:'#FF8E53'},bmi:{l:'BMI',u:'',c:'#FEC85B'},muscleMass:{l:'筋肉量',u:'kg',c:'#4ECDC4'},boneMass:{l:'骨量',u:'kg',c:'#45B7D1'},water:{l:'体水分率',u:'%',c:'#378ADD'},bmr:{l:'基礎代謝',u:'kcal',c:'#A855F7'},visceralFat:{l:'内臓脂肪',u:'',c:'#FF6B6B'},bodyAge:{l:'体年齢',u:'歳',c:'#1D9E75'}};
+      let html='',hasData=false;
+      Object.entries(labels).forEach(([k,v])=>{
+        if(result[k]!=null){hasData=true;html+=`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px"><span style="color:#555;font-weight:600">${v.l}</span><span style="font-weight:800;color:${v.c}">${result[k]}${v.u}</span></div>`;}
       });
-      if(result.measureDate){
-        html+=`<div style="font-size:11px;color:#aaa;margin-top:8px;text-align:right">計測日時：${result.measureDate}</div>`;
-      }
-      if(!hasData){
-        html='<div style="color:#aaa;font-size:13px;padding:8px">数値を読み取れませんでした。eufyLifeの計測結果画面のスクリーンショットをお試しください。</div>';
-      }
+      if(!hasData) html='<div style="color:#aaa;font-size:13px;padding:8px">数値を読み取れませんでした。eufyLifeの計測結果画面をお試しください。</div>';
       document.getElementById('eufy-data-list').innerHTML=html;
       if(hasData) document.getElementById('eufy-save-wrap').style.display='block';
-
     } catch(err){
       document.getElementById('eufy-loading-icon').style.display='none';
-      document.getElementById('eufy-result-title').textContent='エラーが発生しました';
+      document.getElementById('eufy-result-title').textContent='エラー：'+err.message;
       document.getElementById('eufy-result-title').style.color='#FF6B6B';
-      const msg=err.message||'不明なエラー';
-      let hint='';
-      if(msg.includes('quota')||msg.includes('exceeded')){
-        hint='<br><br>無料枠の上限です。太平洋時間の深夜0時（日本時間午後4〜5時）にリセットされます。';
-      }
-      document.getElementById('eufy-data-list').innerHTML=`<div style="color:#FF6B6B;font-size:12px;padding:8px;line-height:1.7">${msg}${hint}</div>`;
     }
   };
   reader.readAsDataURL(file);
 }
-
 async function saveEufyWeight(){
-  if(!lastEufyResult){ alert('読み取り結果がありません'); return; }
+  if(!lastEufyResult) return;
   const u=getUser(); if(!u) return;
   const w=lastEufyResult.weight;
   if(!w){ alert('体重データが見つかりません'); return; }
-
-  // 体重をFirebaseに保存
   await push(ref(db,`users/${currentUserId}/weightLog`),{date:todayKey(),w:parseFloat(w)});
   await set(ref(db,`users/${currentUserId}/weight`),parseFloat(w));
-
-  // 体組成データも保存（あれば）
-  const bodyComp={};
-  if(lastEufyResult.bodyFat) bodyComp.bodyFat=lastEufyResult.bodyFat;
-  if(lastEufyResult.muscleMass) bodyComp.muscleMass=lastEufyResult.muscleMass;
-  if(lastEufyResult.bmi) bodyComp.bmi=lastEufyResult.bmi;
-  if(lastEufyResult.bmr) bodyComp.bmr=lastEufyResult.bmr;
-  if(lastEufyResult.bodyAge) bodyComp.bodyAge=lastEufyResult.bodyAge;
-  if(lastEufyResult.visceralFat) bodyComp.visceralFat=lastEufyResult.visceralFat;
-  if(Object.keys(bodyComp).length>0){
-    await push(ref(db,`users/${currentUserId}/bodyCompLog`),{date:todayKey(),...bodyComp});
-  }
-
+  const bc={};
+  ['bodyFat','muscleMass','bmi','bmr','bodyAge','visceralFat'].forEach(k=>{ if(lastEufyResult[k]!=null) bc[k]=lastEufyResult[k]; });
+  if(Object.keys(bc).length>0) await push(ref(db,`users/${currentUserId}/bodyCompLog`),{date:todayKey(),...bc});
   showToast('体重・体組成を記録しました ✓');
   document.getElementById('eufy-save-wrap').style.display='none';
   updateUI();
 }
 
- window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext; // ========== eufyLife スクショ読み取り ==========
-let lastEufyResult=null;
-
-function triggerEufy(){
-  const key=localStorage.getItem('geminiKey');
-  if(!key){ alert('先にGemini APIキーを設定してください。'); return; }
-  document.getElementById('eufy-input').click();
-}
-
-async function analyzeEufy(event){
-  const file=event.target.files[0]; if(!file) return;
-  const key=localStorage.getItem('geminiKey'); if(!key){ alert('APIキーが設定されていません。'); return; }
-
-  const reader=new FileReader();
-  reader.onload=async(e)=>{
-    const base64=e.target.result.split(',')[1];
-    const mimeType=file.type;
-
-    document.getElementById('eufy-preview').src=e.target.result;
-    document.getElementById('eufy-preview-wrap').style.display='block';
-    document.getElementById('eufy-result-wrap').style.display='block';
-    document.getElementById('eufy-result-title').textContent='読み取り中...';
-    document.getElementById('eufy-result-title').style.color='#333';
-    document.getElementById('eufy-loading-icon').style.display='block';
-    document.getElementById('eufy-data-list').innerHTML='';
-    document.getElementById('eufy-save-wrap').style.display='none';
-    lastEufyResult=null;
-
-    try {
-      const prompt=`このスマート体重計アプリ（eufyLifeなど）のスクリーンショットから、表示されている数値をすべて読み取ってください。
-以下のJSON形式のみで回答してください（他のテキストは一切不要）：
-{"weight":体重数値またはnull,"bodyFat":体脂肪率数値またはnull,"bmi":BMI数値またはnull,"muscle":筋肉量数値またはnull,"water":水分量数値またはnull,"bone":骨量数値またはnull,"bmr":基礎代謝数値またはnull,"visceralFat":内臓脂肪数値またはnull,"date":"日付文字列またはnull"}
-数値が読み取れない項目はnullにしてください。単位は含めず数値のみ。`;
-
-      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          contents:[{parts:[
-            {inline_data:{mime_type:mimeType,data:base64}},
-            {text:prompt}
-          ]}],
-          generationConfig:{temperature:0,maxOutputTokens:500}
-        })
-      });
-
-      const data=await res.json();
-      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text){ const errMsg=data.error?.message||'読み取れませんでした'; throw new Error(errMsg); }
-
-      let clean=text.replace(/```json|```/g,'').trim();
-      const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
-      if(js===-1||je===-1) throw new Error('数値を読み取れませんでした。もう一度お試しください。');
-      let result;
-      try{ result=JSON.parse(clean.slice(js,je+1)); }
-      catch(e){ throw new Error('読み取り結果の解析に失敗しました。'); }
-
-      document.getElementById('eufy-loading-icon').style.display='none';
-      document.getElementById('eufy-result-title').textContent='読み取り完了 ✨';
-      lastEufyResult=result;
-
-      const labels={
-        weight:{label:'体重',unit:'kg',color:'#FF6B6B'},
-        bodyFat:{label:'体脂肪率',unit:'%',color:'#FF8E53'},
-        bmi:{label:'BMI',unit:'',color:'#FEC85B'},
-        muscle:{label:'筋肉量',unit:'kg',color:'#4ECDC4'},
-        water:{label:'水分量',unit:'%',color:'#45B7D1'},
-        bone:{label:'骨量',unit:'kg',color:'#6366F1'},
-        bmr:{label:'基礎代謝',unit:'kcal',color:'#A855F7'},
-        visceralFat:{label:'内臓脂肪',unit:'',color:'#E24B4A'},
-      };
-
-      let html='';
-      let hasData=false;
-      Object.entries(labels).forEach(([key,v])=>{
-        if(result[key]!=null){
-          hasData=true;
-          html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px">
-            <span style="color:#555;font-weight:700">${v.label}</span>
-            <span style="font-weight:800;color:${v.color}">${result[key]}${v.unit}</span>
-          </div>`;
-        }
-      });
-      if(result.date){ html+=`<div style="font-size:11px;color:#aaa;margin-top:8px;text-align:right">計測日時：${result.date}</div>`; }
-
-      if(!hasData){ throw new Error('数値を読み取れませんでした。eufyLifeの計測結果画面のスクリーンショットをお使いください。'); }
-
-      document.getElementById('eufy-data-list').innerHTML=html;
-      if(result.weight!=null) document.getElementById('eufy-save-wrap').style.display='block';
-
-    } catch(err){
-      document.getElementById('eufy-loading-icon').style.display='none';
-      document.getElementById('eufy-result-title').textContent='読み取りエラー';
-      document.getElementById('eufy-result-title').style.color='#FF6B6B';
-      let hint='';
-      if(err.message.includes('quota')||err.message.includes('exceeded')){
-        hint='<br><span style="font-size:11px;color:#888">クォータ超過：午後4〜5時以降に再試行するか、Google Cloudで請求を有効化してください。</span>';
-      }
-      document.getElementById('eufy-data-list').innerHTML=`<div style="color:#FF6B6B;font-size:12px;padding:8px;line-height:1.7">${err.message}${hint}</div>`;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function saveEufyWeight(){
-  if(!lastEufyResult||lastEufyResult.weight==null){ alert('体重データがありません'); return; }
-  const u=getUser(); if(!u) return;
-  const w=parseFloat(lastEufyResult.weight);
-  await push(ref(db,`users/${currentUserId}/weightLog`),{date:todayKey(),w});
-  await set(ref(db,`users/${currentUserId}/weight`),w);
-  // 体脂肪率なども保存
-  if(lastEufyResult.bodyFat!=null){
-    await set(ref(db,`users/${currentUserId}/bodyFatLog/${todayKey()}`),{
-      bodyFat:lastEufyResult.bodyFat,
-      muscle:lastEufyResult.muscle||null,
-      bmi:lastEufyResult.bmi||null,
-      water:lastEufyResult.water||null,
-      bmr:lastEufyResult.bmr||null,
-    });
-  }
-  showToast('体重・体組成を記録しました ✓');
-  document.getElementById('eufy-save-wrap').style.display='none';
-}
-
-window.triggerEufy=triggerEufy; window.analyzeEufy=analyzeEufy; window.saveEufyWeight=saveEufyWeight;
-
-window.go=go;
-window.openSwitch=openSwitch; window.closeSwitch=closeSwitch;
-window.openAdd=openAdd; window.closeForm=closeForm;
-window.saveUser=saveUser;
-window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise;
-window.selMeal=selMeal; window.selG=selG; window.selA=selA;
-window.swC=swC; window.toggleSkip=toggleSkip;
-window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight;
-window.toggleFast=toggleFast; window.setPreset=setPreset;
-window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule;
-window.calPrev=calPrev; window.calNext=calNext;
-window.saveGeminiKey=saveGeminiKey; window.triggerCamera=triggerCamera;
-window.analyzePhoto=analyzePhoto; window.selAiMeal=selAiMeal; window.saveAiResult=saveAiResult;
+window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext; window.saveGeminiKey=saveGeminiKey; window.triggerCamera=triggerCamera; window.analyzePhoto=analyzePhoto; window.selAiMeal=selAiMeal; window.saveAiResult=saveAiResult; window.triggerEufy=triggerEufy; window.analyzeEufy=analyzeEufy; window.saveEufyWeight=saveEufyWeight;
 
 initFastUI();
 initCalendar();
-
-// ナビゲーションボタンのイベントリスナーをモジュール読み込み後に設定
-for(let i=0;i<7;i++){
-  const btn=document.getElementById('nb'+i);
-  if(btn){ btn.addEventListener('click',(function(idx){ return function(){ go(idx); }; })(i)); }
-}
 </script>
 </body>
 </html>
