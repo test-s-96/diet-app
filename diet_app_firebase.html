@@ -1102,7 +1102,7 @@ async function analyzePhoto(event){
 以下のJSON形式のみで回答してください（他のテキストは一切不要）：
 {"foods":[{"name":"食品名","kcal":カロリー数値},...],"total":合計カロリー数値,"comment":"一言コメント"}`;
 
-      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
