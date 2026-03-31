@@ -256,18 +256,21 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
     <div style="margin-bottom:10px">
       <div class="flabel">プリセット</div>
       <div class="preset-row">
+        <button class="preset-btn" onclick="setPreset(14,10,this)">14:10</button>
         <button class="preset-btn" onclick="setPreset(16,8,this)">16:8</button>
         <button class="preset-btn" onclick="setPreset(18,6,this)">18:6</button>
         <button class="preset-btn" onclick="setPreset(20,4,this)">20:4</button>
-        <button class="preset-btn" onclick="setPreset(14,10,this)">14:10</button>
+        <button class="preset-btn" onclick="setPreset(24,0,this)">24h</button>
+        <button class="preset-btn" onclick="setPreset(48,0,this)">48h</button>
+        <button class="preset-btn" onclick="setPreset(72,0,this)">72h</button>
         <button class="preset-btn sel" onclick="setPreset(0,0,this)">カスタム</button>
       </div>
     </div>
     <div class="frow-2">
-      <div><label class="flabel">断食時間（時間）</label><input class="finput" type="number" id="fast-hours" value="16" min="1" max="23" onchange="updateSchedulePreview()"></div>
-      <div><label class="flabel">食事可能時間（時間）</label><input class="finput" type="number" id="eat-hours" value="8" min="1" max="23" onchange="updateSchedulePreview()"></div>
+      <div><label class="flabel">断食時間（時間）</label><input class="finput" type="number" id="fast-hours" value="16" min="1" max="72" onchange="updateSchedulePreview()"></div>
+      <div><label class="flabel">食事可能時間（時間）</label><input class="finput" type="number" id="eat-hours" value="8" min="0" max="23" onchange="updateSchedulePreview()"></div>
     </div>
-    <div class="frow-2">
+    <div class="frow-2" id="eat-time-row">
       <div><label class="flabel">食事開始時刻</label><input class="finput" type="time" id="eat-start" value="12:00" onchange="updateSchedulePreview()"></div>
       <div><label class="flabel">食事終了時刻</label><input class="finput" type="time" id="eat-end" value="20:00" readonly style="opacity:.6"></div>
     </div>
@@ -288,7 +291,7 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
           <defs><linearGradient id="fastGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#A855F7"/></linearGradient></defs>
         </svg>
         <div class="fast-circle-text">
-          <div class="fast-time" id="fast-display-time">00:00:00</div>
+          <div class="fast-time" id="fast-display-time" style="font-size:22px">00:00:00</div>
           <div class="fast-label" id="fast-display-label">断食時間</div>
         </div>
       </div>
@@ -457,8 +460,16 @@ function calcBMR(u){ return u.gender==='女性'?447.6+9.25*u.weight+3.1*u.height
 function calcTarget(u){ const m=u.activity==='低め'?1.375:u.activity==='普通'?1.55:1.725; return Math.round(calcBMR(u)*m-200); }
 function calcBMI(u){ return (u.weight/(u.height/100)**2).toFixed(1); }
 function fmt2(n){ return String(n).padStart(2,'0'); }
-function fmtHMS(sec){ return `${fmt2(Math.floor(sec/3600))}:${fmt2(Math.floor((sec%3600)/60))}:${fmt2(sec%60)}`; }
-function fmtHM(sec){ return `${fmt2(Math.floor(sec/3600))}:${fmt2(Math.floor((sec%3600)/60))}`; }
+function fmtHMS(sec){
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h>=24){ const d=Math.floor(h/24), rh=h%24; return `${d}日 ${fmt2(rh)}:${fmt2(m)}:${fmt2(s)}`; }
+  return `${fmt2(h)}:${fmt2(m)}:${fmt2(s)}`;
+}
+function fmtHM(sec){
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60);
+  if(h>=24){ const d=Math.floor(h/24), rh=h%24; return `${d}日${fmt2(rh)}h${fmt2(m)}m`; }
+  return `${fmt2(h)}:${fmt2(m)}`;
+}
 
 let currentUserId = localStorage.getItem('currentUserId');
 let allUsers = {};
@@ -547,14 +558,24 @@ function updateUI(){
 // ========== 断食機能 ==========
 function updateSchedulePreview(){
   const fh=parseInt(document.getElementById('fast-hours').value)||16;
-  const eh=parseInt(document.getElementById('eat-hours').value)||8;
-  const es=document.getElementById('eat-start').value||'12:00';
-  const [eh2,em2]=es.split(':').map(Number);
-  const endMin=(eh2*60+em2+eh*60)%(24*60);
-  const endStr=`${fmt2(Math.floor(endMin/60))}:${fmt2(endMin%60)}`;
-  document.getElementById('eat-end').value=endStr;
-  document.getElementById('schedule-preview').textContent=`食事可能：${es} 〜 ${endStr}　断食：${endStr} 〜 翌${es}（${fh}時間）`;
-  document.getElementById('eat-hours').value=24-fh;
+  const isLong=fh>=24;
+  // 24時間以上の断食は食事時間帯設定を非表示
+  document.getElementById('eat-time-row').style.display=isLong?'none':'grid';
+  if(isLong){
+    document.getElementById('eat-hours').value=0;
+    const d=Math.floor(fh/24), rh=fh%24;
+    const label=rh>0?`${d}日${rh}時間`:`${d}日間`;
+    document.getElementById('schedule-preview').textContent=`${label}（${fh}時間）の断食スケジュール`;
+  } else {
+    const eh=parseInt(document.getElementById('eat-hours').value)||8;
+    const es=document.getElementById('eat-start').value||'12:00';
+    const [eh2,em2]=es.split(':').map(Number);
+    const endMin=(eh2*60+em2+eh*60)%(24*60);
+    const endStr=`${fmt2(Math.floor(endMin/60))}:${fmt2(endMin%60)}`;
+    document.getElementById('eat-end').value=endStr;
+    document.getElementById('eat-hours').value=24-fh;
+    document.getElementById('schedule-preview').textContent=`食事可能：${es} 〜 ${endStr}　断食：${endStr} 〜 翌${es}（${fh}時間）`;
+  }
 }
 
 function setPreset(fh,eh,btn){
@@ -562,7 +583,7 @@ function setPreset(fh,eh,btn){
   btn.classList.add('sel');
   if(fh>0){
     document.getElementById('fast-hours').value=fh;
-    document.getElementById('eat-hours').value=eh;
+    document.getElementById('eat-hours').value=fh>=24?0:eh;
     updateSchedulePreview();
   }
 }
@@ -625,14 +646,18 @@ function updateFastUI(){
   const statusEl=document.getElementById('fast-display-status');
   const arc=document.getElementById('fast-arc');
   const goalH=fastSchedule.fastHours;
-  document.getElementById('fast-goal-h').textContent=goalH+'h';
+  document.getElementById('fast-goal-h').textContent=goalH>=24?`${Math.floor(goalH/24)}日${goalH%24>0?goalH%24+'h':''}`:goalH+'h';
 
   if(fastState.active){
     const elapsed=Math.floor((Date.now()-fastState.startTs)/1000);
     const goal=goalH*3600;
     const pct=Math.min(elapsed/goal,1);
     const remaining=Math.max(0,goal-elapsed);
-    document.getElementById('fast-display-time').textContent=fmtHMS(elapsed);
+    // 24時間以上はフォントサイズ調整
+    const displayEl=document.getElementById('fast-display-time');
+    const timeStr=fmtHMS(elapsed);
+    displayEl.textContent=timeStr;
+    displayEl.style.fontSize=elapsed>=86400?'16px':elapsed>=3600*10?'20px':'22px';
     document.getElementById('fast-display-label').textContent='経過時間';
     document.getElementById('fast-remain-h').textContent=fmtHM(remaining);
     arc.setAttribute('stroke-dashoffset',Math.round(408*(1-pct)));
@@ -640,12 +665,14 @@ function updateFastUI(){
     statusEl.className='fast-status fasting';
     const startD=new Date(fastState.startTs);
     const endD=new Date(fastState.startTs+goal*1000);
-    document.getElementById('fast-start-time').textContent=`${fmt2(startD.getHours())}:${fmt2(startD.getMinutes())}`;
-    document.getElementById('fast-end-time').textContent=`${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
+    document.getElementById('fast-start-time').textContent=`${fmt2(startD.getMonth()+1)}/${fmt2(startD.getDate())} ${fmt2(startD.getHours())}:${fmt2(startD.getMinutes())}`;
+    document.getElementById('fast-end-time').textContent=`${fmt2(endD.getMonth()+1)}/${fmt2(endD.getDate())} ${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
     btn.textContent='断食を終了する';
     btn.className='fast-btn stop';
   } else {
-    document.getElementById('fast-display-time').textContent='00:00:00';
+    const displayEl=document.getElementById('fast-display-time');
+    displayEl.textContent='00:00:00';
+    displayEl.style.fontSize='22px';
     document.getElementById('fast-display-label').textContent='断食時間';
     document.getElementById('fast-remain-h').textContent='—';
     arc.setAttribute('stroke-dashoffset','408');
@@ -668,7 +695,8 @@ function updateHomeFast(){
   const endD=new Date(fastState.startTs+goal*1000);
   document.getElementById('home-fast-time').textContent=fmtHMS(elapsed);
   document.getElementById('home-fast-label').textContent=pct>=1?'目標達成！🎉':'断食中';
-  document.getElementById('home-fast-end').textContent=`終了予定 ${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
+  const endLabel=`${fmt2(endD.getMonth()+1)}/${fmt2(endD.getDate())} ${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
+  document.getElementById('home-fast-end').textContent=`終了予定 ${endLabel}`;
   document.getElementById('home-fast-arc').setAttribute('stroke-dashoffset',Math.round(163*(1-pct)));
   document.getElementById('h-fast').textContent=fmtHM(elapsed);
 }
