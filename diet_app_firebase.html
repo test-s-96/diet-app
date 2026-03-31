@@ -1117,8 +1117,17 @@ async function analyzePhoto(event){
       if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'APIエラー'); }
       const data=await res.json();
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      const clean=text.replace(/```json|```/g,'').trim();
-      const result=JSON.parse(clean);
+      // JSON部分だけを安全に抽出
+      let clean=text.replace(/```json|```/g,'').trim();
+      // { } の範囲だけを抽出
+      const jsonStart=clean.indexOf('{');
+      const jsonEnd=clean.lastIndexOf('}');
+      if(jsonStart===-1||jsonEnd===-1) throw new Error('AIの応答からJSONを取得できませんでした。もう一度お試しください。');
+      clean=clean.slice(jsonStart,jsonEnd+1);
+      let result;
+      try{ result=JSON.parse(clean); }
+      catch(e){ throw new Error('AI応答のJSON解析に失敗しました。もう一度試してください。'); }
+      if(!result.foods||!Array.isArray(result.foods)) throw new Error('AI応答の形式が不正です。もう一度試してください。');
 
       // 結果表示
       document.getElementById('ai-loading-icon').style.display='none';
@@ -1150,7 +1159,16 @@ async function analyzePhoto(event){
     } catch(err){
       document.getElementById('ai-loading-icon').style.display='none';
       document.getElementById('ai-result-title').textContent='エラーが発生しました';
-      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:13px;padding:8px">${err.message}<br><span style="color:#888;font-size:11px">APIキーを確認してください。</span></div>`;
+      const msg=err.message||'不明なエラー';
+      let hint='';
+      if(msg.includes('quota')||msg.includes('exceeded')||msg.includes('RESOURCE_EXHAUSTED')){
+        hint='<br><br><b>対処法：</b><br>①新しいプロジェクトでAPIキーを再発行する<br>　→ aistudio.google.com で「Create API key in new project」<br>② Google Cloud Consoleで請求を有効化する';
+      } else if(msg.includes('not found')||msg.includes('not supported')){
+        hint='<br><br><b>対処法：</b><br>APIキーが正しく設定されているか確認してください。';
+      } else if(msg.includes('API_KEY_INVALID')||msg.includes('invalid')){
+        hint='<br><br><b>対処法：</b><br>APIキーが無効です。AI解析タブで正しいキーを再設定してください。';
+      }
+      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:12px;padding:8px;line-height:1.7">${msg}${hint}</div>`;
     }
   };
   reader.readAsDataURL(file);
