@@ -1494,6 +1494,12 @@ window.analyzePhoto=analyzePhoto; window.selAiMeal=selAiMeal; window.saveAiResul
 
 initFastUI();
 initCalendar();
+
+// ナビゲーションボタンのイベントリスナーをモジュール読み込み後に設定
+for(let i=0;i<7;i++){
+  const btn=document.getElementById('nb'+i);
+  if(btn){ btn.addEventListener('click',(function(idx){ return function(){ go(idx); }; })(i)); }
+}
 </script>
 </body>
 </html>
