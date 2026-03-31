@@ -308,10 +308,35 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
     </div>
   </div>
 
-  <!-- 断食履歴 -->
+  <!-- 断食履歴カレンダー -->
   <div class="card">
-    <div class="stitle">断食履歴（直近7回）</div>
-    <div id="fast-history"><div style="color:#aaa;font-size:13px;text-align:center;padding:16px">記録がありません</div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button onclick="calPrev()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#6366F1;padding:0 4px">&#8249;</button>
+      <div class="stitle" style="margin-bottom:0" id="cal-title">2025年4月</div>
+      <button onclick="calNext()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#6366F1;padding:0 4px">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#FF6B6B;padding:3px 0">日</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">月</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">火</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">水</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">木</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">金</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#45B7D1;padding:3px 0">土</div>
+    </div>
+    <div id="fast-calendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+    <!-- 凡例 -->
+    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#6366F1,#A855F7)"></div><span style="font-size:10px;color:#888;font-weight:700">目標達成</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#FEC85B,#FF8E53)"></div><span style="font-size:10px;color:#888;font-weight:700">断食あり</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#f0f0f0"></div><span style="font-size:10px;color:#888;font-weight:700">記録なし</span></div>
+    </div>
+    <!-- 選択日の詳細 -->
+    <div id="cal-detail" style="display:none;margin-top:10px;background:#EDE7F6;border-radius:10px;padding:10px">
+      <div style="font-size:12px;font-weight:800;color:#6366F1" id="cal-detail-date"></div>
+      <div style="font-size:15px;font-weight:800;color:#333;margin-top:3px" id="cal-detail-hours"></div>
+      <div style="font-size:11px;color:#888;margin-top:2px" id="cal-detail-status"></div>
+    </div>
   </div>
 </div>
 
@@ -701,21 +726,81 @@ function updateHomeFast(){
   document.getElementById('h-fast').textContent=fmtHM(elapsed);
 }
 
-function updateFastHistory(){
-  const hist=JSON.parse(localStorage.getItem('fastHistory')||'[]').slice(-7).reverse();
-  const el=document.getElementById('fast-history');
-  if(hist.length===0){ el.innerHTML='<div style="color:#aaa;font-size:13px;text-align:center;padding:16px">記録がありません</div>'; return; }
-  const maxH=Math.max(...hist.map(h=>h.hours),fastSchedule.fastHours);
-  el.innerHTML=hist.map(h=>{
-    const pct=Math.min(h.hours/maxH*100,100);
-    const achieved=h.hours>=fastSchedule.fastHours;
-    return `<div class="fast-hist-row">
-      <div class="fast-hist-date">${h.date.slice(5)}</div>
-      <div class="fast-hist-bar-wrap"><div class="fast-hist-bar" style="width:${pct}%;background:${achieved?'linear-gradient(90deg,#6366F1,#A855F7)':'linear-gradient(90deg,#FEC85B,#FF8E53)'}"></div></div>
-      <div class="fast-hist-val" style="color:${achieved?'#6366F1':'#FF8E53'}">${h.hours.toFixed(1)}h</div>
-    </div>`;
-  }).join('');
+let calYear, calMonth;
+function initCalendar(){
+  const now=new Date();
+  calYear=now.getFullYear();
+  calMonth=now.getMonth();
+  renderCalendar();
 }
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function renderCalendar(){
+  const hist=JSON.parse(localStorage.getItem('fastHistory')||'[]');
+  // date→{hours,achieved} のマップ
+  const histMap={};
+  hist.forEach(h=>{ histMap[h.date]={hours:h.hours,achieved:h.hours>=(fastSchedule.fastHours||16)}; });
+
+  const title=document.getElementById('cal-title');
+  title.textContent=`${calYear}年${calMonth+1}月`;
+  const cal=document.getElementById('fast-calendar');
+  cal.innerHTML='';
+
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  // 空白セル
+  for(let i=0;i<firstDay;i++){
+    const blank=document.createElement('div'); blank.style.cssText='height:34px;'; cal.appendChild(blank);
+  }
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rec=histMap[dateStr];
+    const isToday=dateStr===todayStr;
+    const isFuture=dateStr>todayStr;
+    const dow=(firstDay+d-1)%7;
+
+    const cell=document.createElement('div');
+    let bg='#f0f0f0', textCol='#aaa', border='none';
+    if(rec){
+      if(rec.achieved){ bg='linear-gradient(135deg,#6366F1,#A855F7)'; textCol='#fff'; }
+      else{ bg='linear-gradient(135deg,#FEC85B,#FF8E53)'; textCol='#fff'; }
+    } else if(isFuture){
+      bg='transparent'; textCol='#ccc'; border='0.5px solid #eee';
+    }
+    if(isToday){ border='2px solid #6366F1'; }
+    if(dow===0) textCol=rec?'#fff':'#FF6B6B';
+    if(dow===6 && !rec) textCol='#45B7D1';
+
+    cell.style.cssText=`height:34px;border-radius:8px;background:${bg};border:${border};display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:${rec?'pointer':'default'};transition:opacity .15s;`;
+    cell.innerHTML=`<span style="font-size:12px;font-weight:800;color:${textCol};line-height:1">${d}</span>${rec?`<span style="font-size:8px;color:${textCol};opacity:.85;margin-top:1px">${rec.hours.toFixed(1)}h</span>`:''}`;
+
+    if(rec){
+      cell.onclick=()=>showCalDetail(dateStr,rec);
+      cell.onmouseover=()=>cell.style.opacity='.8';
+      cell.onmouseout=()=>cell.style.opacity='1';
+    }
+    cal.appendChild(cell);
+  }
+  document.getElementById('cal-detail').style.display='none';
+}
+
+function showCalDetail(dateStr,rec){
+  const [y,m,d]=dateStr.split('-');
+  document.getElementById('cal-detail').style.display='block';
+  document.getElementById('cal-detail-date').textContent=`${parseInt(m)}月${parseInt(d)}日`;
+  const h=Math.floor(rec.hours), min=Math.round((rec.hours-h)*60);
+  document.getElementById('cal-detail-hours').textContent=`断食時間：${h}時間${min>0?min+'分':''}`;
+  const goal=fastSchedule.fastHours||16;
+  document.getElementById('cal-detail-status').textContent=rec.achieved?`目標（${goal}時間）達成！🎉`:`目標まであと${(goal-rec.hours).toFixed(1)}時間`;
+  document.getElementById('cal-detail-status').style.color=rec.achieved?'#6366F1':'#FF8E53';
+}
+
+function updateFastHistory(){ renderCalendar(); }
 
 // 初期化
 function initFastUI(){
@@ -892,9 +977,10 @@ function drawF(){
 }
 
 // 公開
-window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule;
+window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext;
 
 initFastUI();
+initCalendar();
 </script>
 </body>
 </html>
