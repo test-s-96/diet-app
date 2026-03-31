@@ -28,7 +28,8 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
 .nb.a3{background:linear-gradient(135deg,#A855F7,#6366F1);color:#fff;}
 .nb.a4{background:linear-gradient(135deg,#45B7D1,#4ECDC4);color:#fff;}
 .nb.a5{background:linear-gradient(135deg,#4ECDC4,#1D9E75);color:#fff;}
-.nb.a0 svg,.nb.a1 svg,.nb.a2 svg,.nb.a3 svg,.nb.a4 svg,.nb.a5 svg{filter:brightness(0) invert(1);}
+.nb.a6{background:linear-gradient(135deg,#4ECDC4,#1D9E75);color:#fff;}
+.nb.a0 svg,.nb.a1 svg,.nb.a2 svg,.nb.a3 svg,.nb.a4 svg,.nb.a5 svg,.nb.a6 svg{filter:brightness(0) invert(1);}
 .sec{display:none;}.sec.on{display:block;}
 .card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;border:0.5px solid rgba(0,0,0,0.08);}
 .stitle{font-size:11px;font-weight:800;color:#888;margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;}
@@ -102,6 +103,7 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
 .skip-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .skip-row label{font-size:13px;font-weight:700;color:#888;}
 .skip-check{width:18px;height:18px;cursor:pointer;accent-color:#FF6B6B;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* 断食タイマー */
 .fast-timer-wrap{text-align:center;padding:10px 0 16px;}
@@ -161,6 +163,7 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
   <button class="nb" id="nb3" onclick="go(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>献立</button>
   <button class="nb" id="nb4" onclick="go(4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l5-10 4 6 3-4 4 8"/></svg>グラフ</button>
   <button class="nb" id="nb5" onclick="go(5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>メンバー</button>
+  <button class="nb" id="nb6" onclick="go(6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>AI解析</button>
 </div>
 
 <!-- ホーム -->
@@ -414,6 +417,68 @@ body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
   </div>
   <button class="abtn bp" onclick="openAdd(true)">プロフィールを編集</button>
   <button class="abtn bt" style="margin-top:6px" onclick="openSwitch()">ユーザーを切り替える</button>
+</div>
+
+<!-- AI写真解析 -->
+<div class="sec" id="s6">
+  <!-- APIキー設定 -->
+  <div class="card" id="api-key-card">
+    <div class="stitle">Gemini APIキー設定</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6">
+      Google AI Studioで取得したAPIキーを入力してください。キーはこのデバイスにのみ保存されます。
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="finput" style="flex:1;font-size:13px">
+      <button onclick="saveGeminiKey()" class="abtn bg" style="width:auto;padding:10px 14px;margin-top:0;white-space:nowrap;font-size:12px">保存</button>
+    </div>
+    <div id="key-status" style="font-size:11px;margin-top:6px;color:#888"></div>
+  </div>
+
+  <!-- 写真撮影エリア -->
+  <div class="card">
+    <div class="stitle">料理を撮影してカロリー解析</div>
+    <div id="photo-drop" onclick="triggerCamera()" style="border:2px dashed rgba(0,0,0,0.15);border-radius:16px;padding:28px;text-align:center;cursor:pointer;background:#f8f8f8;transition:all .2s;margin-bottom:12px">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4ECDC4" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px;display:block"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div style="font-size:14px;font-weight:800;color:#333">写真を撮る / 選ぶ</div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px">タップしてカメラまたはライブラリを開く</div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="analyzePhoto(event)">
+
+    <!-- プレビュー -->
+    <div id="photo-preview-wrap" style="display:none;margin-bottom:12px;text-align:center">
+      <img id="photo-preview" style="max-width:100%;border-radius:12px;max-height:200px;object-fit:cover">
+    </div>
+
+    <!-- 解析結果 -->
+    <div id="ai-result-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div id="ai-loading-icon" style="width:18px;height:18px;border:2px solid #4ECDC4;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:none"></div>
+        <div style="font-size:13px;font-weight:800;color:#333" id="ai-result-title">解析結果</div>
+      </div>
+      <div id="ai-foods-list"></div>
+      <div id="ai-total-row" style="display:none;justify-content:space-between;padding-top:10px;border-top:2px solid rgba(0,0,0,0.08);margin-top:4px">
+        <span style="font-size:14px;font-weight:800;color:#333">合計カロリー</span>
+        <span style="font-size:18px;font-weight:800;color:#FF6B6B" id="ai-total-kcal">— kcal</span>
+      </div>
+      <!-- 食事に追加ボタン -->
+      <div id="ai-add-wrap" style="display:none;margin-top:10px">
+        <div style="font-size:12px;color:#888;font-weight:700;margin-bottom:6px">どの食事に記録しますか？</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="gbtn sel" id="ai-mt-b" onclick="selAiMeal('b',this)">朝食</button>
+          <button class="gbtn" id="ai-mt-l" onclick="selAiMeal('l',this)">昼食</button>
+          <button class="gbtn" id="ai-mt-d" onclick="selAiMeal('d',this)">夕食</button>
+          <button class="gbtn" id="ai-mt-s" onclick="selAiMeal('s',this)">間食</button>
+        </div>
+        <button class="abtn bg" onclick="saveAiResult()">この結果を食事記録に追加する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 解析履歴 -->
+  <div class="card">
+    <div class="stitle">最近の解析履歴</div>
+    <div id="ai-history-list"><div style="color:#aaa;font-size:13px;text-align:center;padding:16px">解析履歴がありません</div></div>
+  </div>
 </div>
 
 <!-- ユーザー切り替え -->
@@ -883,9 +948,10 @@ function updateMemberList(){
 }
 
 function go(i){
-  for(let j=0;j<6;j++){ document.getElementById('s'+j).classList.toggle('on',j===i); const b=document.getElementById('nb'+j); b.className='nb'; if(j===i)b.classList.add('a'+i); }
+  for(let j=0;j<7;j++){ document.getElementById('s'+j).classList.toggle('on',j===i); const b=document.getElementById('nb'+j); b.className='nb'; if(j===i)b.classList.add('a'+i); }
   if(i===4) setTimeout(drawCharts,60);
   if(i===5) updateMemberList();
+  if(i===6) initAiTab();
 }
 function selMeal(t,btn){ curMealType=t; document.querySelectorAll('[id^="mt-"]').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
 
@@ -976,8 +1042,152 @@ function drawF(){
   lb.forEach((l,i)=>{ ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='center'; ctx.fillText(l,p.l+i*gap+(gap/2),H-5); });
 }
 
+// ========== Gemini AI写真解析 ==========
+let aiMealType='b';
+let lastAiResult=null;
+
+function saveGeminiKey(){
+  const key=document.getElementById('gemini-key-input').value.trim();
+  if(!key||!key.startsWith('AIzaSy')){ document.getElementById('key-status').textContent='⚠️ 正しいAPIキーを入力してください（AIzaSy...で始まる）'; return; }
+  localStorage.setItem('geminiKey',key);
+  document.getElementById('key-status').textContent='✓ 保存しました';
+  document.getElementById('key-status').style.color='#1D9E75';
+  document.getElementById('gemini-key-input').value='';
+  setTimeout(()=>initAiTab(),500);
+}
+
+function initAiTab(){
+  const key=localStorage.getItem('geminiKey');
+  const card=document.getElementById('api-key-card');
+  const status=document.getElementById('key-status');
+  if(key){
+    card.style.background='#E8FFE8';
+    status.textContent='✓ APIキー設定済み（変更する場合は新しいキーを入力）';
+    status.style.color='#1D9E75';
+  } else {
+    card.style.background='#fff';
+    status.textContent='APIキーが未設定です。上記に入力して保存してください。';
+    status.style.color='#FF6B6B';
+  }
+  updateAiHistory();
+}
+
+function triggerCamera(){
+  const key=localStorage.getItem('geminiKey');
+  if(!key){ alert('先にGemini APIキーを設定してください。'); return; }
+  document.getElementById('photo-input').click();
+}
+
+async function analyzePhoto(event){
+  const file=event.target.files[0]; if(!file) return;
+  const key=localStorage.getItem('geminiKey'); if(!key){ alert('APIキーが設定されていません。'); return; }
+
+  // プレビュー表示
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mimeType=file.type;
+
+    document.getElementById('photo-preview').src=e.target.result;
+    document.getElementById('photo-preview-wrap').style.display='block';
+    document.getElementById('ai-result-wrap').style.display='block';
+    document.getElementById('ai-result-title').textContent='AI解析中...';
+    document.getElementById('ai-loading-icon').style.display='block';
+    document.getElementById('ai-foods-list').innerHTML='';
+    document.getElementById('ai-total-row').style.display='none';
+    document.getElementById('ai-add-wrap').style.display='none';
+
+    try {
+      const prompt=`この料理の写真を見て、含まれている食材・料理を特定し、それぞれのカロリーを推定してください。
+以下のJSON形式のみで回答してください（他のテキストは一切不要）：
+{"foods":[{"name":"食品名","kcal":カロリー数値},...],"total":合計カロリー数値,"comment":"一言コメント"}`;
+
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[
+            {inline_data:{mime_type:mimeType,data:base64}},
+            {text:prompt}
+          ]}],
+          generationConfig:{temperature:0.1,maxOutputTokens:1000}
+        })
+      });
+
+      if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'APIエラー'); }
+      const data=await res.json();
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      const clean=text.replace(/```json|```/g,'').trim();
+      const result=JSON.parse(clean);
+
+      // 結果表示
+      document.getElementById('ai-loading-icon').style.display='none';
+      document.getElementById('ai-result-title').textContent='AI解析完了 ✨';
+      lastAiResult=result;
+
+      let html='';
+      result.foods.forEach(f=>{
+        html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px">
+          <span style="color:#333;font-weight:600">${f.name}</span>
+          <span style="font-weight:800;color:#FF6B6B">${f.kcal} kcal</span>
+        </div>`;
+      });
+      if(result.comment){
+        html+=`<div style="font-size:11px;color:#888;margin-top:8px;padding:8px;background:#f8f8f8;border-radius:8px">${result.comment}</div>`;
+      }
+      document.getElementById('ai-foods-list').innerHTML=html;
+      document.getElementById('ai-total-kcal').textContent=result.total+' kcal';
+      document.getElementById('ai-total-row').style.display='flex';
+      document.getElementById('ai-add-wrap').style.display='block';
+
+      // 履歴に保存
+      const hist=JSON.parse(localStorage.getItem('aiHistory')||'[]');
+      hist.unshift({date:todayKey(),time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),foods:result.foods,total:result.total,img:e.target.result});
+      if(hist.length>10) hist.splice(10);
+      localStorage.setItem('aiHistory',JSON.stringify(hist));
+      updateAiHistory();
+
+    } catch(err){
+      document.getElementById('ai-loading-icon').style.display='none';
+      document.getElementById('ai-result-title').textContent='エラーが発生しました';
+      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:13px;padding:8px">${err.message}<br><span style="color:#888;font-size:11px">APIキーを確認してください。</span></div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function selAiMeal(t,btn){ aiMealType=t; document.querySelectorAll('[id^="ai-mt-"]').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+
+async function saveAiResult(){
+  if(!lastAiResult){ alert('解析結果がありません'); return; }
+  const u=getUser(); if(!u) return;
+  const mealNames=lastAiResult.foods.map(f=>f.name).join('・');
+  await set(ref(db,`users/${currentUserId}/mealLog/${todayKey()}/${aiMealType}`),{
+    name:mealNames.length>20?mealNames.slice(0,20)+'...':mealNames,
+    kcal:lastAiResult.total,
+    skipped:false
+  });
+  showToast('食事記録に追加しました ✓');
+  document.getElementById('ai-add-wrap').style.display='none';
+}
+
+function updateAiHistory(){
+  const hist=JSON.parse(localStorage.getItem('aiHistory')||'[]');
+  const el=document.getElementById('ai-history-list');
+  if(hist.length===0){ el.innerHTML='<div style="color:#aaa;font-size:13px;text-align:center;padding:16px">解析履歴がありません</div>'; return; }
+  el.innerHTML=hist.map(h=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.07)">
+      <img src="${h.img}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#222">${h.foods.slice(0,2).map(f=>f.name).join('・')}${h.foods.length>2?'など':''}</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px">${h.date} ${h.time}</div>
+      </div>
+      <div style="font-size:14px;font-weight:800;color:#FF6B6B">${h.total} kcal</div>
+    </div>`).join('');
+}
+
 // 公開
-window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext;
+window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext; window.saveGeminiKey=saveGeminiKey; window.triggerCamera=triggerCamera; window.analyzePhoto=analyzePhoto; window.selAiMeal=selAiMeal; window.saveAiResult=saveAiResult;
 
 initFastUI();
 initCalendar();
