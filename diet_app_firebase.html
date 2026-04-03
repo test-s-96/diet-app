@@ -1145,17 +1145,26 @@ async function analyzePhoto(event){
       });
 
       const data=await res.json();
-      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text){ throw new Error(data.error?.message||'APIから結果が返りませんでした'); }
+      // デバッグ：生の応答を確認
+      const rawText=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      const finishReason=data.candidates?.[0]?.finishReason||'';
+      const errMsg=data.error?.message||'';
+      if(!rawText && errMsg){ throw new Error(errMsg); }
+      if(!rawText){ throw new Error('空の応答（finishReason:'+finishReason+'）'); }
 
       // JSON部分を安全に抽出・パース
+      let text=rawText;
       let clean=text.replace(/```json|```/g,'').trim();
       const jStart=clean.indexOf('{'), jEnd=clean.lastIndexOf('}');
-      if(jStart===-1||jEnd===-1) throw new Error('AI応答からJSONを取得できませんでした。もう一度お試しください。');
+      if(jStart===-1||jEnd===-1) throw new Error('JSON未検出。AIの応答:'+clean.slice(0,100));
       let result;
       try{ result=JSON.parse(clean.slice(jStart,jEnd+1)); }
-      catch(e){ throw new Error('AI応答のJSON解析に失敗しました。もう一度試してください。'); }
-      if(!result.foods||!Array.isArray(result.foods)) throw new Error('AI応答の形式が不正です。もう一度試してください。');
+      catch(e){ throw new Error('JSONパース失敗:'+clean.slice(jStart,jStart+100)); }
+      if(!result.foods||!Array.isArray(result.foods)){
+        // foodsがなくても合計だけあれば対応
+        if(result.total){ result.foods=[{name:'料理',kcal:result.total}]; }
+        else throw new Error('形式不正:'+JSON.stringify(result).slice(0,100));
+      }
 
       // 結果表示
       document.getElementById('ai-loading-icon').style.display='none';
