@@ -1177,17 +1177,31 @@ async function analyzePhoto(event){
       if(!rawText){ throw new Error('空の応答（finishReason:'+finishReason+'）'); }
 
       // JSON部分を安全に抽出・パース
-      let text=rawText;
-      let clean=text.replace(/```json|```/g,'').trim();
-      const jStart=clean.indexOf('{'), jEnd=clean.lastIndexOf('}');
-      if(jStart===-1||jEnd===-1) throw new Error('JSON未検出。AIの応答:'+clean.slice(0,100));
+      let clean=rawText.replace(/```json|```/g,'').trim();
+      // { } の対応を追跡して正確に抽出
+      let depth=0, jStart=-1, jEnd=-1;
+      for(let i=0;i<clean.length;i++){
+        if(clean[i]==='{'){if(depth===0)jStart=i;depth++;}
+        else if(clean[i]==='}'){depth--;if(depth===0){jEnd=i;break;}}
+      }
+      if(jStart===-1||jEnd===-1) throw new Error('JSON未検出。AIの応答:'+clean.slice(0,80));
       let result;
-      try{ result=JSON.parse(clean.slice(jStart,jEnd+1)); }
-      catch(e){ throw new Error('JSONパース失敗:'+clean.slice(jStart,jStart+100)); }
-      if(!result.foods||!Array.isArray(result.foods)){
-        // foodsがなくても合計だけあれば対応
+      try{
+        result=JSON.parse(clean.slice(jStart,jEnd+1));
+      }catch(e){
+        // パース失敗時はfoodsを正規表現で抽出
+        const foodMatches=clean.matchAll(/"name"\s*:\s*"([^"]+)"\s*,\s*"kcal"\s*:\s*(\d+)/g);
+        const foods=[...foodMatches].map(m=>({name:m[1],kcal:parseInt(m[2])}));
+        if(foods.length>0){
+          const total=foods.reduce((a,f)=>a+f.kcal,0);
+          result={foods,total,comment:''};
+        } else {
+          throw new Error('JSONパース失敗:'+clean.slice(jStart,jStart+80));
+        }
+      }
+      if(!result.foods||!Array.isArray(result.foods)||result.foods.length===0){
         if(result.total){ result.foods=[{name:'料理',kcal:result.total}]; }
-        else throw new Error('形式不正:'+JSON.stringify(result).slice(0,100));
+        else throw new Error('解析結果が空です。もう一度試してください。');
       }
 
       // 結果表示
