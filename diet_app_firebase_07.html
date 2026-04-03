@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ダイエットアプリ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#f0f0f5;min-height:100vh;}
+.app{max-width:420px;margin:0 auto;padding:12px;}
+.hdr{border-radius:20px;padding:16px 18px 14px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;background:linear-gradient(135deg,#FF6B6B,#FF8E53,#FEC85B);}
+.hdr:before{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,0.15);border-radius:50%;}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.hdr-g{font-size:12px;opacity:.9;font-weight:700;}
+.hdr-n{font-size:20px;font-weight:800;}
+.switch-btn{background:rgba(255,255,255,0.25);border:none;border-radius:10px;color:#fff;font-size:11px;font-weight:800;padding:6px 10px;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.hdr-s{display:flex;gap:8px;}
+.hs{background:rgba(255,255,255,0.25);border-radius:10px;padding:6px 8px;flex:1;text-align:center;}
+.hs-v{font-size:15px;font-weight:800;}
+.hs-l{font-size:9px;opacity:.85;font-weight:700;}
+.nav{display:flex;background:#fff;border:0.5px solid rgba(0,0,0,0.1);border-radius:16px;padding:5px;margin-bottom:12px;gap:2px;}
+.nb{flex:1;padding:7px 1px 5px;border:none;background:none;cursor:pointer;font-size:9px;font-weight:700;color:#888;border-radius:10px;font-family:'Nunito',sans-serif;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.nb svg{width:19px;height:19px;}
+.nb.a0{background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff;}
+.nb.a1{background:linear-gradient(135deg,#FEC85B,#FF8E53);color:#fff;}
+.nb.a2{background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;}
+.nb.a3{background:linear-gradient(135deg,#A855F7,#6366F1);color:#fff;}
+.nb.a4{background:linear-gradient(135deg,#45B7D1,#4ECDC4);color:#fff;}
+.nb.a5{background:linear-gradient(135deg,#4ECDC4,#1D9E75);color:#fff;}
+.nb.a6{background:linear-gradient(135deg,#4ECDC4,#1D9E75);color:#fff;}
+.nb.a0 svg,.nb.a1 svg,.nb.a2 svg,.nb.a3 svg,.nb.a4 svg,.nb.a5 svg,.nb.a6 svg{filter:brightness(0) invert(1);}
+.sec{display:none;}.sec.on{display:block;}
+.card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;border:0.5px solid rgba(0,0,0,0.08);}
+.stitle{font-size:11px;font-weight:800;color:#888;margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;}
+.acc{border:none!important;color:#fff!important;}
+.ac-r{background:linear-gradient(135deg,#FF6B6B,#FF8E53);}
+.ac-p{background:linear-gradient(135deg,#A855F7,#6366F1);}
+.ac-t{background:linear-gradient(135deg,#4ECDC4,#45B7D1);}
+.ac-b{background:linear-gradient(135deg,#6366F1,#A855F7);}
+.rw{display:flex;align-items:center;gap:14px;}
+.ri{flex:1;}.rt{font-size:16px;font-weight:800;}.rs{font-size:12px;opacity:.85;margin-top:2px;}
+.nr{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.nl{font-size:11px;font-weight:700;width:56px;color:#888;}
+.nb2{flex:1;height:7px;border-radius:99px;background:#f0f0f0;}
+.nf{height:7px;border-radius:99px;}
+.nv{font-size:11px;font-weight:700;width:60px;text-align:right;color:#333;}
+.mr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);}
+.mr:last-child{border-bottom:none;padding-bottom:0;}
+.mico{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.mi{flex:1;}.mn{font-size:13px;font-weight:700;color:#222;}
+.ms{font-size:11px;color:#888;margin-top:1px;}
+.mk{font-size:14px;font-weight:800;}
+.abtn{width:100%;padding:11px;border-radius:12px;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;margin-top:8px;transition:all .15s;}
+.abtn:hover{opacity:.9;}
+.br{background:linear-gradient(135deg,#FF6B6B,#FF8E53);}
+.bp{background:linear-gradient(135deg,#A855F7,#6366F1);}
+.bt{background:linear-gradient(135deg,#45B7D1,#4ECDC4);}
+.by{background:linear-gradient(135deg,#FEC85B,#FF8E53);}
+.bg{background:linear-gradient(135deg,#4ECDC4,#1D9E75);}
+.bi{background:linear-gradient(135deg,#6366F1,#A855F7);}
+.wg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px;}
+.wc{background:#f5f5f7;border-radius:12px;padding:10px;text-align:center;}
+.wv{font-size:19px;font-weight:800;color:#222;}
+.wl{font-size:10px;color:#888;font-weight:700;margin-top:2px;}
+.wd{font-size:10px;font-weight:800;margin-top:2px;}
+.input-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.input-row label{font-size:12px;font-weight:700;color:#888;width:70px;flex-shrink:0;}
+.input-row input,.input-row select{flex:1;padding:8px 10px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:#f5f5f7;font-size:14px;font-family:'Nunito',sans-serif;color:#222;}
+.input-row span{font-size:12px;color:#888;width:30px;}
+.gbtn{padding:9px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.12);background:#f5f5f7;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#888;text-align:center;}
+.gbtn.sel{background:linear-gradient(135deg,#FF6B6B,#FF8E53);color:#fff;border-color:transparent;}
+.gbtn.sel-b{background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border-color:transparent;}
+.frow{margin-bottom:10px;}
+.frow-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.frow-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.flabel{font-size:11px;font-weight:800;color:#888;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em;}
+.finput{width:100%;padding:10px 12px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.15);background:#f5f5f7;font-size:14px;font-family:'Nunito',sans-serif;color:#222;}
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
+.sheet{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto;}
+.sheet-title{font-size:16px;font-weight:800;color:#222;margin-bottom:14px;text-align:center;}
+.ucard{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;border:0.5px solid rgba(0,0,0,0.1);margin-bottom:8px;cursor:pointer;background:#fff;}
+.ucard.active{border:2px solid #FF6B6B;}
+.uavatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;overflow:hidden;}
+.uname{font-size:14px;font-weight:800;color:#222;}
+.umeta{font-size:11px;color:#888;margin-top:2px;}
+.utag{margin-left:auto;font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;background:#FCEBEB;color:#A32D2D;white-space:nowrap;}
+.utag.cur{background:#E1F5EE;color:#0F6E56;}
+.add-user-btn{width:100%;padding:12px;border-radius:12px;border:1.5px dashed rgba(0,0,0,0.2);background:none;font-size:13px;font-weight:800;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;}
+.close-btn{width:100%;padding:11px;border-radius:12px;border:0.5px solid rgba(0,0,0,0.12);background:none;font-size:13px;font-weight:700;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:8px;}
+.form-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;z-index:200;padding:20px;overflow-y:auto;}
+.form-card{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:380px;margin:auto;}
+.form-title{font-size:16px;font-weight:800;color:#222;margin-bottom:14px;text-align:center;}
+.avatar-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.ap{border-radius:12px;overflow:hidden;cursor:pointer;border:2px solid transparent;}
+.ap.sel{border-color:#FF6B6B;}
+.ap svg{width:100%;height:auto;display:block;}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;padding:8px 20px;border-radius:99px;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:500;}
+.toast.show{opacity:1;}
+.ctabs{display:flex;gap:5px;margin-bottom:8px;}
+.ct{padding:4px 11px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'Nunito',sans-serif;background:#f5f5f7;color:#888;}
+.ct.on{background:linear-gradient(135deg,#A855F7,#6366F1);color:#fff;}
+.skip-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.skip-row label{font-size:13px;font-weight:700;color:#888;}
+.skip-check{width:18px;height:18px;cursor:pointer;accent-color:#FF6B6B;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* 断食タイマー */
+.fast-timer-wrap{text-align:center;padding:10px 0 16px;}
+.fast-circle{position:relative;width:160px;height:160px;margin:0 auto 12px;}
+.fast-circle svg{width:160px;height:160px;}
+.fast-circle-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.fast-time{font-size:28px;font-weight:800;color:#6366F1;line-height:1;}
+.fast-label{font-size:11px;color:#888;font-weight:700;margin-top:4px;}
+.fast-status{font-size:13px;font-weight:800;margin-bottom:12px;}
+.fast-status.fasting{color:#6366F1;}
+.fast-status.eating{color:#1D9E75;}
+.fast-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.fast-info{background:#f5f5f7;border-radius:12px;padding:10px;text-align:center;}
+.fast-info-val{font-size:16px;font-weight:800;color:#222;}
+.fast-info-lbl{font-size:10px;color:#888;font-weight:700;margin-top:2px;}
+.fast-btn-row{display:flex;gap:8px;}
+.fast-btn{flex:1;padding:11px;border-radius:12px;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;transition:all .15s;}
+.fast-btn.start{background:linear-gradient(135deg,#6366F1,#A855F7);}
+.fast-btn.stop{background:linear-gradient(135deg,#FF6B6B,#FF8E53);}
+.fast-btn:hover{opacity:.9;}
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.preset-btn{padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;border:0.5px solid rgba(0,0,0,0.12);background:#f5f5f7;color:#888;font-family:'Nunito',sans-serif;}
+.preset-btn.sel{background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border-color:transparent;}
+.fast-hist-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);}
+.fast-hist-row:last-child{border-bottom:none;}
+.fast-hist-date{font-size:12px;font-weight:700;color:#222;width:60px;}
+.fast-hist-bar-wrap{flex:1;height:8px;background:#f0f0f0;border-radius:99px;overflow:hidden;}
+.fast-hist-bar{height:8px;border-radius:99px;background:linear-gradient(90deg,#6366F1,#A855F7);}
+.fast-hist-val{font-size:12px;font-weight:800;color:#6366F1;width:48px;text-align:right;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="app">
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-g">おはようございます！</div>
+      <div class="hdr-n" id="hdr-name">読み込み中...</div>
+    </div>
+    <button class="switch-btn" onclick="openSwitch()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>切り替え
+    </button>
+  </div>
+  <div class="hdr-s">
+    <div class="hs"><div class="hs-v" id="h-cal">—</div><div class="hs-l">摂取 kcal</div></div>
+    <div class="hs"><div class="hs-v" id="h-target">—</div><div class="hs-l">目標 kcal</div></div>
+    <div class="hs"><div class="hs-v" id="h-weight">—</div><div class="hs-l">体重 kg</div></div>
+    <div class="hs"><div class="hs-v" id="h-fast">—</div><div class="hs-l">断食中</div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb a0" id="nb0" onclick="go(0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>ホーム</button>
+  <button class="nb" id="nb1" onclick="go(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9h18M3 15h18"/></svg>記録</button>
+  <button class="nb" id="nb2" onclick="go(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>断食</button>
+  <button class="nb" id="nb3" onclick="go(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>献立</button>
+  <button class="nb" id="nb4" onclick="go(4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l5-10 4 6 3-4 4 8"/></svg>グラフ</button>
+  <button class="nb" id="nb5" onclick="go(5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>メンバー</button>
+  <button class="nb" id="nb6" onclick="go(6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>AI解析</button>
+</div>
+
+<!-- ホーム -->
+<div class="sec on" id="s0">
+  <div class="card acc ac-r">
+    <div class="rw">
+      <svg width="78" height="78" viewBox="0 0 78 78" style="flex-shrink:0">
+        <circle cx="39" cy="39" r="31" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="7"/>
+        <circle cx="39" cy="39" r="31" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="195" id="ring-arc" stroke-dashoffset="195" stroke-linecap="round" transform="rotate(-90 39 39)"/>
+        <text x="39" y="37" fill="#fff" font-size="11" font-weight="800" font-family="Nunito" text-anchor="middle" id="ring-val">0</text>
+        <text x="39" y="50" fill="rgba(255,255,255,0.8)" font-size="8" font-family="Nunito" text-anchor="middle" id="ring-sub">/ — kcal</text>
+      </svg>
+      <div class="ri"><div class="rt" id="ring-remain">残り — kcal</div><div class="rs" id="ring-msg">今日の記録を入力しよう！</div></div>
+    </div>
+  </div>
+  <!-- 断食ステータスカード -->
+  <div class="card acc ac-b" id="fast-status-card" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:12px;opacity:.85;font-weight:700" id="home-fast-label">断食中</div>
+        <div style="font-size:22px;font-weight:800;margin:2px 0" id="home-fast-time">00:00:00</div>
+        <div style="font-size:11px;opacity:.75" id="home-fast-end">終了予定 —</div>
+      </div>
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="163" id="home-fast-arc" stroke-dashoffset="163" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+      </svg>
+    </div>
+  </div>
+  <div class="card">
+    <div class="stitle">今日の食事</div>
+    <div class="mr" style="padding-top:0">
+      <div class="mico" style="background:#FFF3E0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" fill="#FEC85B" opacity=".8"/><path d="M6 12c0-1 2.7-2 6-2s6 1 6 2v2c0 1-2.7 2-6 2s-6-1-6-2v-2z" fill="#FF8E53" opacity=".7"/></svg></div>
+      <div class="mi"><div class="mn">朝食</div><div class="ms" id="meal-b-name">未記録</div></div>
+      <div class="mk" style="color:#FF8E53" id="meal-b-kcal">— kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#E8F5E9"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="14" rx="7" ry="4" fill="#4ECDC4" opacity=".3"/><path d="M6 14c0-3 2.7-5 6-5s6 2 6 5" stroke="#1D9E75" stroke-width="1.5" fill="none"/><path d="M5 14h14" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="mi"><div class="mn">昼食</div><div class="ms" id="meal-l-name">未記録</div></div>
+      <div class="mk" style="color:#4ECDC4" id="meal-l-kcal">— kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#F3E5F5"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 19V10l5-6 5 6v9" fill="#EDE7F6" stroke="#A855F7" stroke-width="1.5" stroke-linejoin="round"/><rect x="10" y="13" width="4" height="6" rx="1" fill="#A855F7" opacity=".4"/></svg></div>
+      <div class="mi"><div class="mn">夕食</div><div class="ms" id="meal-d-name">未記録</div></div>
+      <div class="mk" style="color:#A855F7" id="meal-d-kcal">— kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#E3F2FD"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="10" r="3" fill="#45B7D1" opacity=".4"/><circle cx="15" cy="10" r="3" fill="#4ECDC4" opacity=".4"/><path d="M6 18c0-2 2.7-4 6-4s6 2 6 4" stroke="#45B7D1" stroke-width="1.5" fill="none"/></svg></div>
+      <div class="mi"><div class="mn">間食</div><div class="ms" id="meal-s-name">未記録</div></div>
+      <div class="mk" style="color:#45B7D1" id="meal-s-kcal">— kcal</div>
+    </div>
+  </div>
+</div>
+
+<!-- 記録 -->
+<div class="sec" id="s1">
+  <div class="card">
+    <div class="stitle">体重を記録</div>
+    <div class="input-row"><label>今日の体重</label><input type="number" id="inp-weight" step="0.1" placeholder="52.4"><span>kg</span></div>
+    <button class="abtn br" onclick="saveWeight()">体重を保存する</button>
+  </div>
+  <div class="card">
+    <div class="stitle">食事を記録</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="gbtn sel" id="mt-b" onclick="selMeal('b',this)">朝食</button>
+      <button class="gbtn" id="mt-l" onclick="selMeal('l',this)">昼食</button>
+      <button class="gbtn" id="mt-d" onclick="selMeal('d',this)">夕食</button>
+      <button class="gbtn" id="mt-s" onclick="selMeal('s',this)">間食</button>
+    </div>
+    <div class="skip-row">
+      <input type="checkbox" class="skip-check" id="skip-meal" onchange="toggleSkip()">
+      <label for="skip-meal">この食事は食べなかった（0 kcal）</label>
+    </div>
+    <div id="meal-input-area">
+      <div class="input-row"><label>メニュー名</label><input type="text" id="inp-meal-name" placeholder="例）ご飯・味噌汁"></div>
+      <div class="input-row"><label>カロリー</label><input type="number" id="inp-meal-kcal" placeholder="480"><span>kcal</span></div>
+    </div>
+    <button class="abtn by" onclick="saveMeal()">食事を保存する</button>
+  </div>
+  <div class="card">
+    <div class="stitle">運動を記録</div>
+    <div class="input-row"><label>運動内容</label><input type="text" id="inp-ex-name" placeholder="例）ウォーキング"></div>
+    <div class="input-row"><label>消費 kcal</label><input type="number" id="inp-ex-kcal" placeholder="150"><span>kcal</span></div>
+    <button class="abtn bt" onclick="saveExercise()">運動を保存する</button>
+  </div>
+</div>
+
+<!-- 断食 -->
+<div class="sec" id="s2">
+  <!-- スケジュール設定 -->
+  <div class="card">
+    <div class="stitle">断食スケジュール設定</div>
+    <div style="margin-bottom:10px">
+      <div class="flabel">プリセット</div>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="setPreset(14,10,this)">14:10</button>
+        <button class="preset-btn" onclick="setPreset(16,8,this)">16:8</button>
+        <button class="preset-btn" onclick="setPreset(18,6,this)">18:6</button>
+        <button class="preset-btn" onclick="setPreset(20,4,this)">20:4</button>
+        <button class="preset-btn" onclick="setPreset(24,0,this)">24h</button>
+        <button class="preset-btn" onclick="setPreset(48,0,this)">48h</button>
+        <button class="preset-btn" onclick="setPreset(72,0,this)">72h</button>
+        <button class="preset-btn sel" onclick="setPreset(0,0,this)">カスタム</button>
+      </div>
+    </div>
+    <div class="frow-2">
+      <div><label class="flabel">断食時間（時間）</label><input class="finput" type="number" id="fast-hours" value="16" min="1" max="72" onchange="updateSchedulePreview()"></div>
+      <div><label class="flabel">食事可能時間（時間）</label><input class="finput" type="number" id="eat-hours" value="8" min="0" max="23" onchange="updateSchedulePreview()"></div>
+    </div>
+    <div class="frow-2" id="eat-time-row">
+      <div><label class="flabel">食事開始時刻</label><input class="finput" type="time" id="eat-start" value="12:00" onchange="updateSchedulePreview()"></div>
+      <div><label class="flabel">食事終了時刻</label><input class="finput" type="time" id="eat-end" value="20:00" readonly style="opacity:.6"></div>
+    </div>
+    <div style="background:#EDE7F6;border-radius:10px;padding:10px;margin-bottom:8px;font-size:12px;color:#6366F1;font-weight:700" id="schedule-preview">
+      食事可能：12:00 〜 20:00　断食：20:00 〜 翌12:00（16時間）
+    </div>
+    <button class="abtn bi" onclick="saveSchedule()">スケジュールを保存する</button>
+  </div>
+
+  <!-- タイマー -->
+  <div class="card">
+    <div class="stitle">断食タイマー</div>
+    <div class="fast-timer-wrap">
+      <div class="fast-circle">
+        <svg viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="65" fill="none" stroke="#EDE7F6" stroke-width="10"/>
+          <circle cx="80" cy="80" r="65" fill="none" stroke="url(#fastGrad)" stroke-width="10" stroke-dasharray="408" id="fast-arc" stroke-dashoffset="408" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <defs><linearGradient id="fastGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#A855F7"/></linearGradient></defs>
+        </svg>
+        <div class="fast-circle-text">
+          <div class="fast-time" id="fast-display-time" style="font-size:22px">00:00:00</div>
+          <div class="fast-label" id="fast-display-label">断食時間</div>
+        </div>
+      </div>
+      <div class="fast-status fasting" id="fast-display-status">待機中</div>
+      <div class="fast-info-grid">
+        <div class="fast-info"><div class="fast-info-val" id="fast-goal-h">16h</div><div class="fast-info-lbl">目標断食時間</div></div>
+        <div class="fast-info"><div class="fast-info-val" id="fast-remain-h">—</div><div class="fast-info-lbl">残り時間</div></div>
+        <div class="fast-info"><div class="fast-info-val" id="fast-start-time">—</div><div class="fast-info-lbl">開始時刻</div></div>
+        <div class="fast-info"><div class="fast-info-val" id="fast-end-time">—</div><div class="fast-info-lbl">終了予定</div></div>
+      </div>
+      <div class="fast-btn-row">
+        <button class="fast-btn start" id="fast-toggle-btn" onclick="toggleFast()">断食を開始する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 断食履歴カレンダー -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button onclick="calPrev()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#6366F1;padding:0 4px">&#8249;</button>
+      <div class="stitle" style="margin-bottom:0" id="cal-title">2025年4月</div>
+      <button onclick="calNext()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#6366F1;padding:0 4px">&#8250;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px">
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#FF6B6B;padding:3px 0">日</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">月</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">火</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">水</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">木</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#888;padding:3px 0">金</div>
+      <div style="text-align:center;font-size:10px;font-weight:800;color:#45B7D1;padding:3px 0">土</div>
+    </div>
+    <div id="fast-calendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+    <!-- 凡例 -->
+    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#6366F1,#A855F7)"></div><span style="font-size:10px;color:#888;font-weight:700">目標達成</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#FEC85B,#FF8E53)"></div><span style="font-size:10px;color:#888;font-weight:700">断食あり</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:12px;border-radius:3px;background:#f0f0f0"></div><span style="font-size:10px;color:#888;font-weight:700">記録なし</span></div>
+    </div>
+    <!-- 選択日の詳細 -->
+    <div id="cal-detail" style="display:none;margin-top:10px;background:#EDE7F6;border-radius:10px;padding:10px">
+      <div style="font-size:12px;font-weight:800;color:#6366F1" id="cal-detail-date"></div>
+      <div style="font-size:15px;font-weight:800;color:#333;margin-top:3px" id="cal-detail-hours"></div>
+      <div style="font-size:11px;color:#888;margin-top:2px" id="cal-detail-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 献立 -->
+<div class="sec" id="s3">
+  <div class="card acc ac-t" style="margin-bottom:12px">
+    <div style="font-size:13px;opacity:.85;font-weight:700" id="plan-target-label">今日の目標：— kcal</div>
+    <div style="font-size:11px;opacity:.75;margin-top:4px">バランスの良い1日の献立例</div>
+  </div>
+  <div class="card">
+    <div class="stitle" id="meal-plan-title">今日の献立</div>
+    <div class="mr" style="padding-top:0">
+      <div class="mico" style="background:#FFF8E1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" fill="#FEC85B" opacity=".3"/><circle cx="12" cy="12" r="3.5" fill="#FF8E53" opacity=".8"/></svg></div>
+      <div class="mi"><div class="mn">朝食</div><div class="ms">玄米・豆腐味噌汁・納豆</div></div>
+      <div class="mk" style="color:#FF8E53" id="plan-b-kcal">450 kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#E8F5E9"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="15" rx="7" ry="4" fill="#4ECDC4" opacity=".2"/><path d="M6 15c0-3 2.7-6 6-6s6 3 6 6" fill="#E8F5E9" stroke="#1D9E75" stroke-width="1.5"/><path d="M5 15h14" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="mi"><div class="mn">昼食</div><div class="ms">鶏むね肉サラダ・全粒粉パン</div></div>
+      <div class="mk" style="color:#4ECDC4" id="plan-l-kcal">560 kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#EDE7F6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 18c0-3 2.7-5 6-5s6 2 6 5" fill="#EDE7F6" stroke="#A855F7" stroke-width="1.5"/><path d="M5 18h14" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="12" cy="9" rx="3" ry="2" fill="#A855F7" opacity=".3"/></svg></div>
+      <div class="mi"><div class="mn">夕食</div><div class="ms">鮭の塩焼き・ひじき煮・ご飯</div></div>
+      <div class="mk" style="color:#A855F7" id="plan-d-kcal">540 kcal</div>
+    </div>
+    <div class="mr">
+      <div class="mico" style="background:#E3F2FD"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="10" r="2.5" fill="#45B7D1" opacity=".3" stroke="#45B7D1" stroke-width="1.2"/><circle cx="15" cy="10" r="2.5" fill="#4ECDC4" opacity=".3" stroke="#4ECDC4" stroke-width="1.2"/></svg></div>
+      <div class="mi"><div class="mn">間食</div><div class="ms">ギリシャヨーグルト・バナナ</div></div>
+      <div class="mk" style="color:#45B7D1" id="plan-s-kcal">250 kcal</div>
+    </div>
+  </div>
+  <button class="abtn br" onclick="proposeMeal()">AIに献立を提案してもらう（要API）</button>
+  <button class="abtn bg" style="margin-top:6px" onclick="proposeTonight()">今夜の夕食を提案してもらう（要API）</button>
+</div>
+
+<!-- グラフ -->
+<div class="sec" id="s4">
+  <div class="wg">
+    <div class="wc"><div class="wv" id="w-cur">—</div><div class="wl">現在 kg</div><div class="wd" id="w-chg" style="color:#888">—</div></div>
+    <div class="wc"><div class="wv" id="w-goal">—</div><div class="wl">目標 kg</div><div class="wd" id="w-diff" style="color:#888">—</div></div>
+    <div class="wc"><div class="wv" id="w-bmi">—</div><div class="wl">BMI</div><div class="wd" id="w-bmi-lbl" style="color:#1D9E75">—</div></div>
+  </div>
+  <div class="card">
+    <div class="stitle">体重の推移</div>
+    <div class="ctabs">
+      <button class="ct on" onclick="swC('w',this)">週</button>
+      <button class="ct" onclick="swC('m',this)">月</button>
+    </div>
+    <div style="position:relative;height:150px;margin:6px 0"><canvas id="wChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="stitle">カロリー推移（今週）</div>
+    <div style="position:relative;height:120px;margin:6px 0"><canvas id="cChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="stitle">断食時間の推移（直近7回）</div>
+    <div style="position:relative;height:110px;margin:6px 0"><canvas id="fChart"></canvas></div>
+  </div>
+</div>
+
+<!-- メンバー -->
+<div class="sec" id="s5">
+  <div class="card">
+    <div class="stitle">グループメンバー（今日）</div>
+    <div id="member-list"><div style="color:#aaa;font-size:13px;text-align:center;padding:20px">読み込み中...</div></div>
+  </div>
+  <div class="card acc ac-p" style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;">
+        <svg id="prof-avatar-svg" width="54" height="54" viewBox="0 0 54 54"></svg>
+      </div>
+      <div><div style="font-size:18px;font-weight:800" id="prof-name">—</div><div style="font-size:12px;opacity:.85;margin-top:2px" id="prof-meta">—</div></div>
+    </div>
+  </div>
+  <button class="abtn bp" onclick="openAdd(true)">プロフィールを編集</button>
+  <button class="abtn bt" style="margin-top:6px" onclick="openSwitch()">ユーザーを切り替える</button>
+</div>
+
+<!-- AI写真解析 -->
+<div class="sec" id="s6">
+  <!-- APIキー設定 -->
+  <div class="card" id="api-key-card">
+    <div class="stitle">Gemini APIキー設定</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.6">
+      Google AI Studioで取得したAPIキーを入力してください。キーはこのデバイスにのみ保存されます。
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="finput" style="flex:1;font-size:13px">
+      <button onclick="saveGeminiKey()" class="abtn bg" style="width:auto;padding:10px 14px;margin-top:0;white-space:nowrap;font-size:12px">保存</button>
+    </div>
+    <div id="key-status" style="font-size:11px;margin-top:6px;color:#888"></div>
+  </div>
+
+  <!-- 写真撮影エリア -->
+  <div class="card">
+    <div class="stitle">料理を撮影してカロリー解析</div>
+    <div id="photo-drop" onclick="triggerCamera()" style="border:2px dashed rgba(0,0,0,0.15);border-radius:16px;padding:28px;text-align:center;cursor:pointer;background:#f8f8f8;transition:all .2s;margin-bottom:12px">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4ECDC4" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 8px;display:block"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div style="font-size:14px;font-weight:800;color:#333">写真を撮る / 選ぶ</div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px">タップしてカメラまたはライブラリを開く</div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="analyzePhoto(event)">
+
+    <!-- プレビュー -->
+    <div id="photo-preview-wrap" style="display:none;margin-bottom:12px;text-align:center">
+      <img id="photo-preview" style="max-width:100%;border-radius:12px;max-height:200px;object-fit:cover">
+    </div>
+
+    <!-- 解析結果 -->
+    <div id="ai-result-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div id="ai-loading-icon" style="width:18px;height:18px;border:2px solid #4ECDC4;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:none"></div>
+        <div style="font-size:13px;font-weight:800;color:#333" id="ai-result-title">解析結果</div>
+      </div>
+      <div id="ai-foods-list"></div>
+      <div id="ai-total-row" style="display:none;justify-content:space-between;padding-top:10px;border-top:2px solid rgba(0,0,0,0.08);margin-top:4px">
+        <span style="font-size:14px;font-weight:800;color:#333">合計カロリー</span>
+        <span style="font-size:18px;font-weight:800;color:#FF6B6B" id="ai-total-kcal">— kcal</span>
+      </div>
+      <!-- 食事に追加ボタン -->
+      <div id="ai-add-wrap" style="display:none;margin-top:10px">
+        <div style="font-size:12px;color:#888;font-weight:700;margin-bottom:6px">どの食事に記録しますか？</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="gbtn sel" id="ai-mt-b" onclick="selAiMeal('b',this)">朝食</button>
+          <button class="gbtn" id="ai-mt-l" onclick="selAiMeal('l',this)">昼食</button>
+          <button class="gbtn" id="ai-mt-d" onclick="selAiMeal('d',this)">夕食</button>
+          <button class="gbtn" id="ai-mt-s" onclick="selAiMeal('s',this)">間食</button>
+        </div>
+        <button class="abtn bg" onclick="saveAiResult()">この結果を食事記録に追加する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 解析履歴 -->
+  <div class="card">
+    <div class="stitle">最近の解析履歴</div>
+    <div id="ai-history-list"><div style="color:#aaa;font-size:13px;text-align:center;padding:16px">解析履歴がありません</div></div>
+  </div>
+</div>
+
+<!-- ユーザー切り替え -->
+<div class="overlay" id="switch-overlay" style="display:none" onclick="if(event.target===this)closeSwitch()">
+  <div class="sheet">
+    <div class="sheet-title">ユーザーを選択</div>
+    <div id="user-list"></div>
+    <button class="add-user-btn" onclick="openAdd(false)">＋ 新しいユーザーを追加</button>
+    <button class="close-btn" onclick="closeSwitch()">閉じる</button>
+  </div>
+</div>
+
+<!-- プロフィール編集 -->
+<div class="form-overlay" id="form-overlay" style="display:none" onclick="if(event.target===this)closeForm()">
+  <div class="form-card">
+    <div class="form-title" id="form-title">新しいユーザーを追加</div>
+    <div class="frow"><div class="flabel">アバター</div><div class="avatar-pick" id="avatar-pick"></div></div>
+    <div class="frow"><label class="flabel">名前</label><input class="finput" id="f-name" type="text" placeholder="例）さくら"></div>
+    <div class="frow-2">
+      <div><label class="flabel">年齢</label><input class="finput" id="f-age" type="number" placeholder="25"></div>
+      <div><label class="flabel">身長 cm</label><input class="finput" id="f-height" type="number" placeholder="158"></div>
+    </div>
+    <div class="frow-2">
+      <div><label class="flabel">体重 kg</label><input class="finput" id="f-weight" type="number" placeholder="52.4" step="0.1"></div>
+      <div><label class="flabel">目標体重 kg</label><input class="finput" id="f-goal" type="number" placeholder="49" step="0.1"></div>
+    </div>
+    <div class="frow-2" style="margin-bottom:10px">
+      <div><div class="flabel">性別</div><div style="display:flex;gap:6px"><button class="gbtn sel" id="gb-f" onclick="selG('女性')">女性</button><button class="gbtn" id="gb-m" onclick="selG('男性')">男性</button></div></div>
+      <div><div class="flabel">活動量</div><div class="frow-3"><button class="gbtn sel" id="al-l" onclick="selA('低め')">低め</button><button class="gbtn" id="al-m" onclick="selA('普通')">普通</button><button class="gbtn" id="al-h" onclick="selA('高め')">高め</button></div></div>
+    </div>
+    <button class="abtn br" onclick="saveUser()">保存する</button>
+    <button class="close-btn" onclick="closeForm()">キャンセル</button>
+  </div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDu2mCoNu07xZYG4jRLPxZmox_WgzgBbnw",
+  authDomain: "diet-app-data.firebaseapp.com",
+  databaseURL: "https://diet-app-data-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "diet-app-data",
+  storageBucket: "diet-app-data.firebasestorage.app",
+  messagingSenderId: "239703990434",
+  appId: "1:239703970434:web:06aa8c4435905d07deda9b"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+
+const AVATARS=[
+  {bg:'#FFE0E0',p:`<circle cx="27" cy="18" r="9" fill="#FF6B6B" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#FF8E53" opacity=".9"/><path d="M20 16c0-3 3-6 7-6s7 3 7 6" fill="#FEC85B" opacity=".6"/>`},
+  {bg:'#E0F5FF',p:`<circle cx="27" cy="18" r="9" fill="#45B7D1" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#4ECDC4" opacity=".9"/><rect x="20" y="8" width="14" height="8" rx="4" fill="#fff" opacity=".4"/>`},
+  {bg:'#F0E8FF',p:`<circle cx="27" cy="18" r="9" fill="#A855F7" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#6366F1" opacity=".9"/>`},
+  {bg:'#E8FFE8',p:`<circle cx="27" cy="18" r="9" fill="#1D9E75" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#4ECDC4" opacity=".9"/>`},
+  {bg:'#FFF8E0',p:`<circle cx="27" cy="18" r="9" fill="#FEC85B" opacity=".9"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#FF8E53" opacity=".9"/><circle cx="23" cy="17" r="1.5" fill="#fff"/><circle cx="31" cy="17" r="1.5" fill="#fff"/>`},
+  {bg:'#FFE8F0',p:`<circle cx="27" cy="18" r="9" fill="#D4537E" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#FF6B6B" opacity=".9"/>`},
+  {bg:'#E8F0FF',p:`<circle cx="27" cy="18" r="9" fill="#378ADD" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#45B7D1" opacity=".9"/>`},
+  {bg:'#FFF0E8',p:`<circle cx="27" cy="18" r="9" fill="#D85A30" opacity=".8"/><path d="M10 45c0-9 7.7-14 17-14s17 5 17 14" fill="#FF8E53" opacity=".9"/>`},
+];
+
+function mkSVG(idx,size=46){ const a=AVATARS[idx%AVATARS.length]; return `<svg width="${size}" height="${size}" viewBox="0 0 54 54"><rect width="54" height="54" fill="${a.bg}"/>${a.p}</svg>`; }
+function todayKey(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+function calcBMR(u){ return u.gender==='女性'?447.6+9.25*u.weight+3.1*u.height-4.33*u.age:88.36+13.4*u.weight+4.8*u.height-5.68*u.age; }
+function calcTarget(u){ const m=u.activity==='低め'?1.375:u.activity==='普通'?1.55:1.725; return Math.round(calcBMR(u)*m-200); }
+function calcBMI(u){ return (u.weight/(u.height/100)**2).toFixed(1); }
+function fmt2(n){ return String(n).padStart(2,'0'); }
+function fmtHMS(sec){
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h>=24){ const d=Math.floor(h/24), rh=h%24; return `${d}日 ${fmt2(rh)}:${fmt2(m)}:${fmt2(s)}`; }
+  return `${fmt2(h)}:${fmt2(m)}:${fmt2(s)}`;
+}
+function fmtHM(sec){
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60);
+  if(h>=24){ const d=Math.floor(h/24), rh=h%24; return `${d}日${fmt2(rh)}h${fmt2(m)}m`; }
+  return `${fmt2(h)}:${fmt2(m)}`;
+}
+
+let currentUserId = localStorage.getItem('currentUserId');
+let allUsers = {};
+let selAvatarIdx=0, selGender='女性', selActivity='低め', editMode=false, cmode='w', curMealType='b';
+
+// 断食状態（ローカル管理）
+let fastState = JSON.parse(localStorage.getItem('fastState')||'null') || {active:false,startTs:null,goalHours:16};
+let fastSchedule = JSON.parse(localStorage.getItem('fastSchedule')||'null') || {fastHours:16,eatHours:8,eatStart:'12:00',eatEnd:'20:00'};
+let timerInterval = null;
+
+onValue(ref(db,'users'), snapshot=>{
+  allUsers = snapshot.val()||{};
+  if(!currentUserId||!allUsers[currentUserId]){
+    if(Object.keys(allUsers).length>0){ currentUserId=Object.keys(allUsers)[0]; localStorage.setItem('currentUserId',currentUserId); }
+  }
+  updateUI();
+  updateMemberList();
+});
+
+function getUser(){ return allUsers[currentUserId]; }
+
+function updateUI(){
+  const u=getUser(); if(!u) return;
+  const target=calcTarget(u);
+  const today=todayKey();
+  const meals=(u.mealLog&&u.mealLog[today])||{};
+
+  // 断食中はカロリーゼロ扱い
+  const isFasting = fastState.active;
+  const consumed = isFasting ? 0 : ['b','l','d','s'].reduce((a,k)=>a+(meals[k]?.kcal||0),0);
+  const remain=Math.max(0,target-consumed);
+  const wlog=u.weightLog?Object.values(u.weightLog).sort((a,b)=>a.date>b.date?1:-1):[];
+  const cw=wlog.length>0?wlog[wlog.length-1].w:u.weight;
+  const bmi=calcBMI({...u,weight:cw});
+
+  document.getElementById('hdr-name').textContent=u.name;
+  document.getElementById('h-cal').textContent=isFasting?'断食中':consumed.toLocaleString();
+  document.getElementById('h-target').textContent=target.toLocaleString();
+  document.getElementById('h-weight').textContent=parseFloat(cw).toFixed(1);
+
+  const pct=Math.min(consumed/target,1);
+  document.getElementById('ring-arc').setAttribute('stroke-dashoffset',Math.round(195*(1-pct)));
+  document.getElementById('ring-val').textContent=isFasting?'0':consumed.toLocaleString();
+  document.getElementById('ring-sub').textContent='/ '+target.toLocaleString()+' kcal';
+  document.getElementById('ring-remain').textContent=isFasting?'断食中（0 kcal）':'残り '+remain.toLocaleString()+' kcal';
+  document.getElementById('ring-msg').textContent=isFasting?'断食中です！水分補給を忘れずに':pct>0.9?'もうすぐ達成！':consumed===0?'今日の記録を入力しよう！':'頑張りましょう！';
+
+  const mLabels={b:{col:'#FF8E53'},l:{col:'#4ECDC4'},d:{col:'#A855F7'},s:{col:'#45B7D1'}};
+  Object.entries(mLabels).forEach(([k,v])=>{
+    const m=meals[k];
+    const nameEl=document.getElementById('meal-'+k+'-name');
+    const kcalEl=document.getElementById('meal-'+k+'-kcal');
+    if(m&&m.skipped){nameEl.textContent='食べなかった';kcalEl.textContent='0 kcal';kcalEl.style.color='#ccc';}
+    else if(m&&m.name){nameEl.textContent=m.name;kcalEl.textContent=m.kcal+' kcal';kcalEl.style.color=v.col;}
+    else{nameEl.textContent='未記録';kcalEl.textContent='— kcal';kcalEl.style.color='#ccc';}
+  });
+
+  // 献立
+  document.getElementById('plan-target-label').textContent='今日の目標：'+target.toLocaleString()+' kcal';
+  document.getElementById('meal-plan-title').textContent=u.name+'さんの今日の献立';
+  const ratio=target/1800;
+  document.getElementById('plan-b-kcal').textContent=Math.round(450*ratio)+' kcal';
+  document.getElementById('plan-l-kcal').textContent=Math.round(560*ratio)+' kcal';
+  document.getElementById('plan-d-kcal').textContent=Math.round(540*ratio)+' kcal';
+  document.getElementById('plan-s-kcal').textContent=Math.round(250*ratio)+' kcal';
+
+  // グラフ用
+  document.getElementById('w-cur').textContent=parseFloat(cw).toFixed(1);
+  document.getElementById('w-goal').textContent=u.goal.toFixed(1);
+  document.getElementById('w-bmi').textContent=bmi;
+  document.getElementById('w-diff').textContent=(cw-u.goal)>0?'あと'+(cw-u.goal).toFixed(1)+'kg':'達成！';
+  const bmiN=parseFloat(bmi);
+  document.getElementById('w-bmi-lbl').textContent=bmiN<18.5?'低体重':bmiN<25?'普通体重':'肥満';
+  document.getElementById('w-bmi-lbl').style.color=bmiN<18.5?'#FEC85B':bmiN<25?'#1D9E75':'#FF6B6B';
+  if(wlog.length>1){const chg=(wlog[wlog.length-1].w-wlog[0].w).toFixed(1);document.getElementById('w-chg').textContent=(chg>0?'+':'')+chg+'kg';document.getElementById('w-chg').style.color=chg<0?'#1D9E75':'#FF6B6B';}
+
+  const a=AVATARS[u.avatarIdx%AVATARS.length];
+  document.getElementById('prof-avatar-svg').innerHTML=`<rect width="54" height="54" fill="${a.bg}"/>${a.p}`;
+  document.getElementById('prof-name').textContent=u.name;
+  document.getElementById('prof-meta').textContent=u.age+'歳・'+u.gender+'・'+u.height+'cm';
+
+  updateFastUI();
+  updateFastHistory();
+}
+
+// ========== 断食機能 ==========
+function updateSchedulePreview(){
+  const fh=parseInt(document.getElementById('fast-hours').value)||16;
+  const isLong=fh>=24;
+  // 24時間以上の断食は食事時間帯設定を非表示
+  document.getElementById('eat-time-row').style.display=isLong?'none':'grid';
+  if(isLong){
+    document.getElementById('eat-hours').value=0;
+    const d=Math.floor(fh/24), rh=fh%24;
+    const label=rh>0?`${d}日${rh}時間`:`${d}日間`;
+    document.getElementById('schedule-preview').textContent=`${label}（${fh}時間）の断食スケジュール`;
+  } else {
+    const eh=parseInt(document.getElementById('eat-hours').value)||8;
+    const es=document.getElementById('eat-start').value||'12:00';
+    const [eh2,em2]=es.split(':').map(Number);
+    const endMin=(eh2*60+em2+eh*60)%(24*60);
+    const endStr=`${fmt2(Math.floor(endMin/60))}:${fmt2(endMin%60)}`;
+    document.getElementById('eat-end').value=endStr;
+    document.getElementById('eat-hours').value=24-fh;
+    document.getElementById('schedule-preview').textContent=`食事可能：${es} 〜 ${endStr}　断食：${endStr} 〜 翌${es}（${fh}時間）`;
+  }
+}
+
+function setPreset(fh,eh,btn){
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  if(fh>0){
+    document.getElementById('fast-hours').value=fh;
+    document.getElementById('eat-hours').value=fh>=24?0:eh;
+    updateSchedulePreview();
+  }
+}
+
+function saveSchedule(){
+  const fh=parseInt(document.getElementById('fast-hours').value)||16;
+  const eh=24-fh;
+  const es=document.getElementById('eat-start').value;
+  const ee=document.getElementById('eat-end').value;
+  fastSchedule={fastHours:fh,eatHours:eh,eatStart:es,eatEnd:ee};
+  localStorage.setItem('fastSchedule',JSON.stringify(fastSchedule));
+  document.getElementById('fast-goal-h').textContent=fh+'h';
+  showToast('スケジュールを保存しました ✓');
+}
+
+function toggleFast(){
+  if(!fastState.active){
+    // 開始
+    fastState={active:true,startTs:Date.now(),goalHours:fastSchedule.fastHours};
+    localStorage.setItem('fastState',JSON.stringify(fastState));
+    startTimer();
+    showToast('断食を開始しました！');
+  } else {
+    // 終了・記録
+    const elapsed=Math.floor((Date.now()-fastState.startTs)/1000);
+    const hours=elapsed/3600;
+    saveFastRecord(hours);
+    fastState={active:false,startTs:null,goalHours:fastSchedule.fastHours};
+    localStorage.setItem('fastState',JSON.stringify(fastState));
+    stopTimer();
+    showToast(`断食終了！${fmtHM(elapsed)}達成しました！`);
+  }
+  updateFastUI();
+  updateUI();
+}
+
+function saveFastRecord(hours){
+  const u=getUser(); if(!u) return;
+  const rec={date:todayKey(),hours:Math.round(hours*10)/10,ts:Date.now()};
+  push(ref(db,`users/${currentUserId}/fastLog`),rec);
+  // ローカルにも保存
+  const local=JSON.parse(localStorage.getItem('fastHistory')||'[]');
+  local.push(rec);
+  if(local.length>30) local.splice(0,local.length-30);
+  localStorage.setItem('fastHistory',JSON.stringify(local));
+}
+
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{ updateFastUI(); updateHomeFast(); },1000);
+}
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  document.getElementById('fast-status-card').style.display='none';
+  document.getElementById('h-fast').textContent='—';
+}
+
+function updateFastUI(){
+  const btn=document.getElementById('fast-toggle-btn');
+  const statusEl=document.getElementById('fast-display-status');
+  const arc=document.getElementById('fast-arc');
+  const goalH=fastSchedule.fastHours;
+  document.getElementById('fast-goal-h').textContent=goalH>=24?`${Math.floor(goalH/24)}日${goalH%24>0?goalH%24+'h':''}`:goalH+'h';
+
+  if(fastState.active){
+    const elapsed=Math.floor((Date.now()-fastState.startTs)/1000);
+    const goal=goalH*3600;
+    const pct=Math.min(elapsed/goal,1);
+    const remaining=Math.max(0,goal-elapsed);
+    // 24時間以上はフォントサイズ調整
+    const displayEl=document.getElementById('fast-display-time');
+    const timeStr=fmtHMS(elapsed);
+    displayEl.textContent=timeStr;
+    displayEl.style.fontSize=elapsed>=86400?'16px':elapsed>=3600*10?'20px':'22px';
+    document.getElementById('fast-display-label').textContent='経過時間';
+    document.getElementById('fast-remain-h').textContent=fmtHM(remaining);
+    arc.setAttribute('stroke-dashoffset',Math.round(408*(1-pct)));
+    statusEl.textContent=pct>=1?'目標達成！🎉':'断食中...';
+    statusEl.className='fast-status fasting';
+    const startD=new Date(fastState.startTs);
+    const endD=new Date(fastState.startTs+goal*1000);
+    document.getElementById('fast-start-time').textContent=`${fmt2(startD.getMonth()+1)}/${fmt2(startD.getDate())} ${fmt2(startD.getHours())}:${fmt2(startD.getMinutes())}`;
+    document.getElementById('fast-end-time').textContent=`${fmt2(endD.getMonth()+1)}/${fmt2(endD.getDate())} ${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
+    btn.textContent='断食を終了する';
+    btn.className='fast-btn stop';
+  } else {
+    const displayEl=document.getElementById('fast-display-time');
+    displayEl.textContent='00:00:00';
+    displayEl.style.fontSize='22px';
+    document.getElementById('fast-display-label').textContent='断食時間';
+    document.getElementById('fast-remain-h').textContent='—';
+    arc.setAttribute('stroke-dashoffset','408');
+    statusEl.textContent='待機中';
+    statusEl.className='fast-status eating';
+    document.getElementById('fast-start-time').textContent='—';
+    document.getElementById('fast-end-time').textContent='—';
+    btn.textContent='断食を開始する';
+    btn.className='fast-btn start';
+  }
+}
+
+function updateHomeFast(){
+  const card=document.getElementById('fast-status-card');
+  if(!fastState.active){ card.style.display='none'; document.getElementById('h-fast').textContent='—'; return; }
+  card.style.display='block';
+  const elapsed=Math.floor((Date.now()-fastState.startTs)/1000);
+  const goal=fastSchedule.fastHours*3600;
+  const pct=Math.min(elapsed/goal,1);
+  const endD=new Date(fastState.startTs+goal*1000);
+  document.getElementById('home-fast-time').textContent=fmtHMS(elapsed);
+  document.getElementById('home-fast-label').textContent=pct>=1?'目標達成！🎉':'断食中';
+  const endLabel=`${fmt2(endD.getMonth()+1)}/${fmt2(endD.getDate())} ${fmt2(endD.getHours())}:${fmt2(endD.getMinutes())}`;
+  document.getElementById('home-fast-end').textContent=`終了予定 ${endLabel}`;
+  document.getElementById('home-fast-arc').setAttribute('stroke-dashoffset',Math.round(163*(1-pct)));
+  document.getElementById('h-fast').textContent=fmtHM(elapsed);
+}
+
+let calYear, calMonth;
+function initCalendar(){
+  const now=new Date();
+  calYear=now.getFullYear();
+  calMonth=now.getMonth();
+  renderCalendar();
+}
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function renderCalendar(){
+  const hist=JSON.parse(localStorage.getItem('fastHistory')||'[]');
+  // date→{hours,achieved} のマップ
+  const histMap={};
+  hist.forEach(h=>{ histMap[h.date]={hours:h.hours,achieved:h.hours>=(fastSchedule.fastHours||16)}; });
+
+  const title=document.getElementById('cal-title');
+  title.textContent=`${calYear}年${calMonth+1}月`;
+  const cal=document.getElementById('fast-calendar');
+  cal.innerHTML='';
+
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  // 空白セル
+  for(let i=0;i<firstDay;i++){
+    const blank=document.createElement('div'); blank.style.cssText='height:34px;'; cal.appendChild(blank);
+  }
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const rec=histMap[dateStr];
+    const isToday=dateStr===todayStr;
+    const isFuture=dateStr>todayStr;
+    const dow=(firstDay+d-1)%7;
+
+    const cell=document.createElement('div');
+    let bg='#f0f0f0', textCol='#aaa', border='none';
+    if(rec){
+      if(rec.achieved){ bg='linear-gradient(135deg,#6366F1,#A855F7)'; textCol='#fff'; }
+      else{ bg='linear-gradient(135deg,#FEC85B,#FF8E53)'; textCol='#fff'; }
+    } else if(isFuture){
+      bg='transparent'; textCol='#ccc'; border='0.5px solid #eee';
+    }
+    if(isToday){ border='2px solid #6366F1'; }
+    if(dow===0) textCol=rec?'#fff':'#FF6B6B';
+    if(dow===6 && !rec) textCol='#45B7D1';
+
+    cell.style.cssText=`height:34px;border-radius:8px;background:${bg};border:${border};display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:${rec?'pointer':'default'};transition:opacity .15s;`;
+    cell.innerHTML=`<span style="font-size:12px;font-weight:800;color:${textCol};line-height:1">${d}</span>${rec?`<span style="font-size:8px;color:${textCol};opacity:.85;margin-top:1px">${rec.hours.toFixed(1)}h</span>`:''}`;
+
+    if(rec){
+      cell.onclick=()=>showCalDetail(dateStr,rec);
+      cell.onmouseover=()=>cell.style.opacity='.8';
+      cell.onmouseout=()=>cell.style.opacity='1';
+    }
+    cal.appendChild(cell);
+  }
+  document.getElementById('cal-detail').style.display='none';
+}
+
+function showCalDetail(dateStr,rec){
+  const [y,m,d]=dateStr.split('-');
+  document.getElementById('cal-detail').style.display='block';
+  document.getElementById('cal-detail-date').textContent=`${parseInt(m)}月${parseInt(d)}日`;
+  const h=Math.floor(rec.hours), min=Math.round((rec.hours-h)*60);
+  document.getElementById('cal-detail-hours').textContent=`断食時間：${h}時間${min>0?min+'分':''}`;
+  const goal=fastSchedule.fastHours||16;
+  document.getElementById('cal-detail-status').textContent=rec.achieved?`目標（${goal}時間）達成！🎉`:`目標まであと${(goal-rec.hours).toFixed(1)}時間`;
+  document.getElementById('cal-detail-status').style.color=rec.achieved?'#6366F1':'#FF8E53';
+}
+
+function updateFastHistory(){ renderCalendar(); }
+
+// 初期化
+function initFastUI(){
+  document.getElementById('fast-hours').value=fastSchedule.fastHours;
+  document.getElementById('eat-hours').value=fastSchedule.eatHours;
+  document.getElementById('eat-start').value=fastSchedule.eatStart;
+  document.getElementById('eat-end').value=fastSchedule.eatEnd;
+  updateSchedulePreview();
+  document.getElementById('fast-goal-h').textContent=fastSchedule.fastHours+'h';
+  if(fastState.active){ startTimer(); updateHomeFast(); }
+  updateFastUI();
+  updateFastHistory();
+}
+
+// ========== 食事・体重記録 ==========
+function toggleSkip(){
+  const skip=document.getElementById('skip-meal').checked;
+  document.getElementById('meal-input-area').style.opacity=skip?'0.4':'1';
+  document.getElementById('meal-input-area').style.pointerEvents=skip?'none':'auto';
+}
+
+async function saveWeight(){
+  const u=getUser(); if(!u) return;
+  const val=parseFloat(document.getElementById('inp-weight').value);
+  if(!val||isNaN(val)){ alert('体重を入力してください'); return; }
+  await push(ref(db,`users/${currentUserId}/weightLog`),{date:todayKey(),w:val});
+  await set(ref(db,`users/${currentUserId}/weight`),val);
+  showToast('体重を保存しました ✓');
+  document.getElementById('inp-weight').value='';
+}
+
+async function saveMeal(){
+  const u=getUser(); if(!u) return;
+  const skipped=document.getElementById('skip-meal').checked;
+  let name,kcal;
+  if(skipped){ name='食べなかった'; kcal=0; }
+  else{
+    name=document.getElementById('inp-meal-name').value.trim();
+    kcal=parseInt(document.getElementById('inp-meal-kcal').value)||0;
+    if(!name){ alert('メニュー名を入力してください'); return; }
+  }
+  await set(ref(db,`users/${currentUserId}/mealLog/${todayKey()}/${curMealType}`),{name,kcal,skipped:skipped||false});
+  showToast('食事を保存しました ✓');
+  document.getElementById('inp-meal-name').value='';
+  document.getElementById('inp-meal-kcal').value='';
+  document.getElementById('skip-meal').checked=false;
+  toggleSkip();
+}
+
+async function saveExercise(){
+  const name=document.getElementById('inp-ex-name').value.trim();
+  const kcal=parseInt(document.getElementById('inp-ex-kcal').value);
+  if(!name||!kcal){ alert('内容と消費カロリーを入力してください'); return; }
+  await push(ref(db,`users/${currentUserId}/exerciseLog`),{date:todayKey(),name,kcal});
+  showToast('運動を保存しました ✓');
+  document.getElementById('inp-ex-name').value=''; document.getElementById('inp-ex-kcal').value='';
+}
+
+function proposeMeal(){
+  alert('この機能はAnthropic APIキーの設定が必要です。');
+}
+function proposeTonight(){
+  alert('この機能はAnthropic APIキーの設定が必要です。');
+}
+
+function updateMemberList(){
+  const list=document.getElementById('member-list'); list.innerHTML='';
+  const today=todayKey();
+  Object.entries(allUsers).forEach(([id,u])=>{
+    const meals=(u.mealLog&&u.mealLog[today])||{};
+    const consumed=['b','l','d','s'].reduce((a,k)=>a+(meals[k]?.kcal||0),0);
+    const wlog=u.weightLog?Object.values(u.weightLog).sort((a,b)=>a.date>b.date?1:-1):[];
+    const cw=wlog.length>0?wlog[wlog.length-1].w:u.weight;
+    const target=calcTarget(u);
+    const isMe=id===currentUserId;
+    const div=document.createElement('div'); div.className='mr'; div.style.paddingTop='8px';
+    div.innerHTML=`<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0">${mkSVG(u.avatarIdx||0,36)}</div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#222">${u.name}${isMe?' (自分)':''}</div><div style="font-size:11px;color:#888;margin-top:1px">${parseFloat(cw).toFixed(1)}kg → 目標${u.goal.toFixed(1)}kg</div></div><div style="text-align:right"><div style="font-size:13px;font-weight:800;color:${consumed>target?'#FF6B6B':'#4ECDC4'}">${consumed.toLocaleString()} kcal</div><div style="font-size:10px;color:#aaa">/ ${target.toLocaleString()} kcal</div></div>`;
+    list.appendChild(div);
+  });
+}
+
+function go(i){
+  for(let j=0;j<7;j++){ document.getElementById('s'+j).classList.toggle('on',j===i); const b=document.getElementById('nb'+j); b.className='nb'; if(j===i)b.classList.add('a'+i); }
+  if(i===4) setTimeout(drawCharts,60);
+  if(i===5) updateMemberList();
+  if(i===6) initAiTab();
+}
+function selMeal(t,btn){ curMealType=t; document.querySelectorAll('[id^="mt-"]').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+
+function openSwitch(){
+  const list=document.getElementById('user-list'); list.innerHTML='';
+  Object.entries(allUsers).forEach(([id,u])=>{
+    const div=document.createElement('div'); div.className='ucard'+(id===currentUserId?' active':'');
+    div.innerHTML=`<div class="uavatar">${mkSVG(u.avatarIdx||0)}</div><div><div class="uname">${u.name}</div><div class="umeta">${u.age}歳・${u.gender}・${u.weight.toFixed(1)}kg</div></div><span class="utag${id===currentUserId?' cur':''}">${id===currentUserId?'選択中':'切替'}</span>`;
+    div.onclick=()=>{ currentUserId=id; localStorage.setItem('currentUserId',id); closeSwitch(); updateUI(); };
+    list.appendChild(div);
+  });
+  document.getElementById('switch-overlay').style.display='flex';
+}
+function closeSwitch(){ document.getElementById('switch-overlay').style.display='none'; }
+function buildAvatarPicker(idx){ const pick=document.getElementById('avatar-pick'); pick.innerHTML=''; AVATARS.forEach((a,i)=>{ const div=document.createElement('div'); div.className='ap'+(i===idx?' sel':''); div.innerHTML=mkSVG(i,60); div.onclick=()=>{ selAvatarIdx=i; document.querySelectorAll('.ap').forEach(x=>x.classList.remove('sel')); div.classList.add('sel'); }; pick.appendChild(div); }); }
+function openAdd(isEdit){ editMode=isEdit; const u=isEdit?getUser():null; document.getElementById('form-title').textContent=isEdit?'プロフィールを編集':'新しいユーザーを追加'; document.getElementById('f-name').value=u?u.name:''; document.getElementById('f-age').value=u?u.age:''; document.getElementById('f-height').value=u?u.height:''; document.getElementById('f-weight').value=u?u.weight:''; document.getElementById('f-goal').value=u?u.goal:''; selAvatarIdx=u?u.avatarIdx||0:0; selGender=u?u.gender:'女性'; selActivity=u?u.activity:'低め'; buildAvatarPicker(selAvatarIdx); selG(selGender); selA(selActivity); closeSwitch(); document.getElementById('form-overlay').style.display='flex'; }
+function closeForm(){ document.getElementById('form-overlay').style.display='none'; }
+function selG(g){ selGender=g; document.getElementById('gb-f').classList.toggle('sel',g==='女性'); document.getElementById('gb-m').classList.toggle('sel',g==='男性'); }
+function selA(a){ selActivity=a; ['l','m','h'].forEach(k=>document.getElementById('al-'+k).classList.remove('sel')); document.getElementById('al-'+{低め:'l',普通:'m',高め:'h'}[a]).classList.add('sel'); }
+async function saveUser(){
+  const name=document.getElementById('f-name').value.trim(), age=parseInt(document.getElementById('f-age').value), height=parseFloat(document.getElementById('f-height').value), weight=parseFloat(document.getElementById('f-weight').value), goal=parseFloat(document.getElementById('f-goal').value);
+  if(!name||!age||!height||!weight||!goal){ alert('すべての項目を入力してください'); return; }
+  if(editMode){ await set(ref(db,`users/${currentUserId}`),{...getUser(),name,age,height,weight,goal,avatarIdx:selAvatarIdx,gender:selGender,activity:selActivity}); }
+  else{ const newRef=push(ref(db,'users')); currentUserId=newRef.key; localStorage.setItem('currentUserId',currentUserId); await set(newRef,{name,avatarIdx:selAvatarIdx,age,height,weight,goal,gender:selGender,activity:selActivity,mealLog:{},weightLog:{},exerciseLog:{},fastLog:{}}); }
+  showToast('プロフィールを保存しました ✓'); closeForm();
+}
+
+function swC(m,btn){ document.querySelectorAll('.ct').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); cmode=m; drawCharts(); }
+function drawCharts(){ drawW(); drawC(); drawF(); }
+
+function drawW(){
+  const cvs=document.getElementById('wChart'); if(!cvs)return;
+  const u=getUser(); if(!u)return;
+  const ctx=cvs.getContext('2d');
+  const wlog=u.weightLog?Object.values(u.weightLog).sort((a,b)=>a.date>b.date?1:-1):[];
+  const slice=cmode==='w'?wlog.slice(-7):wlog.slice(-30);
+  const data=slice.map(l=>l.w), lb=slice.map(l=>{ const p=l.date.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); });
+  const W=cvs.offsetWidth||380,H=150; cvs.width=W; cvs.height=H; ctx.clearRect(0,0,W,H);
+  if(data.length<2){ ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.font='12px Nunito'; ctx.textAlign='center'; ctx.fillText('記録が増えるとグラフが表示されます',W/2,H/2); return; }
+  const p={l:36,r:12,t:10,b:22},cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const mn=Math.min(...data)-.3,mx=Math.max(...data)+.3;
+  const sx=i=>p.l+i/(data.length-1)*cw, sy=v=>p.t+(1-(v-mn)/(mx-mn))*ch;
+  const gc='rgba(0,0,0,0.06)',tc='rgba(0,0,0,0.35)';
+  for(let i=0;i<4;i++){ const y=p.t+i/3*ch; ctx.strokeStyle=gc; ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(W-p.r,y); ctx.stroke(); ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='right'; ctx.fillText((mx-i/3*(mx-mn)).toFixed(1),p.l-3,y+3); }
+  const step=Math.max(1,Math.floor(data.length/6));
+  lb.forEach((l,i)=>{ if(i%step===0||i===data.length-1){ ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='center'; ctx.fillText(l,sx(i),H-5); } });
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'rgba(168,85,247,0.2)'); g.addColorStop(1,'rgba(168,85,247,0)');
+  ctx.beginPath(); ctx.moveTo(sx(0),sy(data[0])); data.forEach((_,i)=>{ if(i>0)ctx.lineTo(sx(i),sy(data[i])); }); ctx.lineTo(sx(data.length-1),H-p.b); ctx.lineTo(sx(0),H-p.b); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(sx(0),sy(data[0])); data.forEach((_,i)=>{ if(i>0)ctx.lineTo(sx(i),sy(data[i])); }); ctx.strokeStyle='#A855F7'; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+  data.forEach((v,i)=>{ ctx.beginPath(); ctx.arc(sx(i),sy(v),3.5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#A855F7'; ctx.lineWidth=1.5; ctx.stroke(); });
+}
+
+function drawC(){
+  const cvs=document.getElementById('cChart'); if(!cvs)return;
+  const u=getUser(); if(!u)return;
+  const ctx=cvs.getContext('2d'), target=calcTarget(u);
+  const last7=[];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; const meals=(u.mealLog&&u.mealLog[k])||{}; const total=['b','l','d','s'].reduce((a,t)=>a+(meals[t]?.kcal||0),0); last7.push({total,label:(d.getMonth()+1)+'/'+(d.getDate())}); }
+  const data=last7.map(x=>x.total), lb=last7.map(x=>x.label);
+  const W=cvs.offsetWidth||380,H=120; cvs.width=W; cvs.height=H; ctx.clearRect(0,0,W,H);
+  const p={l:36,r:10,t:10,b:22},cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const maxV=Math.max(target*1.3,...data,100), bw=cw/data.length*.6, gap=cw/data.length;
+  const gc='rgba(0,0,0,0.06)',tc='rgba(0,0,0,0.35)';
+  const ty=p.t+(1-target/maxV)*ch;
+  ctx.setLineDash([3,3]); ctx.strokeStyle='#FF6B6B'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(p.l,ty); ctx.lineTo(W-p.r,ty); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle='#FF6B6B'; ctx.font='8px Nunito'; ctx.textAlign='left'; ctx.fillText('目標',p.l+2,ty-2);
+  [0,Math.round(maxV/2),Math.round(maxV)].forEach(v=>{ const y=p.t+(1-v/maxV)*ch; ctx.strokeStyle=gc; ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(W-p.r,y); ctx.stroke(); ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='right'; ctx.fillText(v,p.l-3,y+3); });
+  data.forEach((v,i)=>{ if(v===0)return; const x=p.l+i*gap+(gap-bw)/2,bh=v/maxV*ch,by=p.t+ch-bh,over=v>target; const g2=ctx.createLinearGradient(0,by,0,by+bh); if(over){g2.addColorStop(0,'#FF6B6B');g2.addColorStop(1,'#FF8E53');}else{g2.addColorStop(0,'#4ECDC4');g2.addColorStop(1,'#45B7D1');} ctx.fillStyle=g2; const r=3; ctx.beginPath(); ctx.moveTo(x+r,by); ctx.lineTo(x+bw-r,by); ctx.arcTo(x+bw,by,x+bw,by+r,r); ctx.lineTo(x+bw,by+bh); ctx.lineTo(x,by+bh); ctx.lineTo(x,by+r); ctx.arcTo(x,by,x+r,by,r); ctx.closePath(); ctx.fill(); });
+  lb.forEach((l,i)=>{ ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='center'; ctx.fillText(l,p.l+i*gap+(gap/2),H-5); });
+}
+
+function drawF(){
+  const cvs=document.getElementById('fChart'); if(!cvs)return;
+  const ctx=cvs.getContext('2d');
+  const hist=JSON.parse(localStorage.getItem('fastHistory')||'[]').slice(-7);
+  const W=cvs.offsetWidth||380,H=110; cvs.width=W; cvs.height=H; ctx.clearRect(0,0,W,H);
+  if(hist.length===0){ ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.font='12px Nunito'; ctx.textAlign='center'; ctx.fillText('断食記録がありません',W/2,H/2); return; }
+  const data=hist.map(h=>h.hours), lb=hist.map(h=>h.date.slice(5));
+  const p={l:28,r:10,t:10,b:22},cw=W-p.l-p.r,ch=H-p.t-p.b;
+  const maxV=Math.max(...data,fastSchedule.fastHours+2), goal=fastSchedule.fastHours;
+  const bw=cw/data.length*.6, gap=cw/data.length;
+  const gc='rgba(0,0,0,0.06)',tc='rgba(0,0,0,0.35)';
+  const gy=p.t+(1-goal/maxV)*ch;
+  ctx.setLineDash([3,3]); ctx.strokeStyle='#6366F1'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(p.l,gy); ctx.lineTo(W-p.r,gy); ctx.stroke();
+  ctx.setLineDash([]); ctx.fillStyle='#6366F1'; ctx.font='8px Nunito'; ctx.textAlign='left'; ctx.fillText('目標',p.l+2,gy-2);
+  [0,Math.round(maxV/2),Math.round(maxV)].forEach(v=>{ const y=p.t+(1-v/maxV)*ch; ctx.strokeStyle=gc; ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(W-p.r,y); ctx.stroke(); ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='right'; ctx.fillText(v+'h',p.l-2,y+3); });
+  data.forEach((v,i)=>{ const x=p.l+i*gap+(gap-bw)/2,bh=v/maxV*ch,by=p.t+ch-bh,achieved=v>=goal; const g2=ctx.createLinearGradient(0,by,0,by+bh); if(achieved){g2.addColorStop(0,'#6366F1');g2.addColorStop(1,'#A855F7');}else{g2.addColorStop(0,'#FEC85B');g2.addColorStop(1,'#FF8E53');} ctx.fillStyle=g2; const r=3; ctx.beginPath(); ctx.moveTo(x+r,by); ctx.lineTo(x+bw-r,by); ctx.arcTo(x+bw,by,x+bw,by+r,r); ctx.lineTo(x+bw,by+bh); ctx.lineTo(x,by+bh); ctx.lineTo(x,by+r); ctx.arcTo(x,by,x+r,by,r); ctx.closePath(); ctx.fill(); });
+  lb.forEach((l,i)=>{ ctx.fillStyle=tc; ctx.font='9px Nunito'; ctx.textAlign='center'; ctx.fillText(l,p.l+i*gap+(gap/2),H-5); });
+}
+
+// ========== Gemini AI写真解析 ==========
+let aiMealType='b';
+let lastAiResult=null;
+
+function saveGeminiKey(){
+  const key=document.getElementById('gemini-key-input').value.trim();
+  if(!key||!key.startsWith('AIzaSy')){ document.getElementById('key-status').textContent='⚠️ 正しいAPIキーを入力してください（AIzaSy...で始まる）'; return; }
+  localStorage.setItem('geminiKey',key);
+  document.getElementById('key-status').textContent='✓ 保存しました';
+  document.getElementById('key-status').style.color='#1D9E75';
+  document.getElementById('gemini-key-input').value='';
+  setTimeout(()=>initAiTab(),500);
+}
+
+function initAiTab(){
+  const key=localStorage.getItem('geminiKey');
+  const card=document.getElementById('api-key-card');
+  const status=document.getElementById('key-status');
+  if(key){
+    card.style.background='#E8FFE8';
+    status.textContent='✓ APIキー設定済み（変更する場合は新しいキーを入力）';
+    status.style.color='#1D9E75';
+  } else {
+    card.style.background='#fff';
+    status.textContent='APIキーが未設定です。上記に入力して保存してください。';
+    status.style.color='#FF6B6B';
+  }
+  updateAiHistory();
+}
+
+function triggerCamera(){
+  const key=localStorage.getItem('geminiKey');
+  if(!key){ alert('先にGemini APIキーを設定してください。'); return; }
+  document.getElementById('photo-input').click();
+}
+
+async function analyzePhoto(event){
+  const file=event.target.files[0]; if(!file) return;
+  const key=localStorage.getItem('geminiKey'); if(!key){ alert('APIキーが設定されていません。'); return; }
+
+  // プレビュー表示
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mimeType=file.type;
+
+    document.getElementById('photo-preview').src=e.target.result;
+    document.getElementById('photo-preview-wrap').style.display='block';
+    document.getElementById('ai-result-wrap').style.display='block';
+    document.getElementById('ai-result-title').textContent='AI解析中...';
+    document.getElementById('ai-loading-icon').style.display='block';
+    document.getElementById('ai-foods-list').innerHTML='';
+    document.getElementById('ai-total-row').style.display='none';
+    document.getElementById('ai-add-wrap').style.display='none';
+
+    try {
+      const prompt=`この料理の写真を見て、含まれている食材・料理を特定し、それぞれのカロリーを推定してください。
+以下のJSON形式のみで回答してください（他のテキストは一切不要）：
+{"foods":[{"name":"食品名","kcal":カロリー数値},...],"total":合計カロリー数値,"comment":"一言コメント"}`;
+
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[
+            {inline_data:{mime_type:mimeType,data:base64}},
+            {text:prompt}
+          ]}],
+          generationConfig:{temperature:0.1,maxOutputTokens:1000}
+        })
+      });
+
+      if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'APIエラー'); }
+      const data=await res.json();
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      // JSON部分だけを安全に抽出
+      let clean=text.replace(/```json|```/g,'').trim();
+      // { } の範囲だけを抽出
+      const jsonStart=clean.indexOf('{');
+      const jsonEnd=clean.lastIndexOf('}');
+      if(jsonStart===-1||jsonEnd===-1) throw new Error('AIの応答からJSONを取得できませんでした。もう一度お試しください。');
+      clean=clean.slice(jsonStart,jsonEnd+1);
+      let result;
+      try{ result=JSON.parse(clean); }
+      catch(e){ throw new Error('AI応答のJSON解析に失敗しました。もう一度試してください。'); }
+      if(!result.foods||!Array.isArray(result.foods)) throw new Error('AI応答の形式が不正です。もう一度試してください。');
+
+      // 結果表示
+      document.getElementById('ai-loading-icon').style.display='none';
+      document.getElementById('ai-result-title').textContent='AI解析完了 ✨';
+      lastAiResult=result;
+
+      let html='';
+      result.foods.forEach(f=>{
+        html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px">
+          <span style="color:#333;font-weight:600">${f.name}</span>
+          <span style="font-weight:800;color:#FF6B6B">${f.kcal} kcal</span>
+        </div>`;
+      });
+      if(result.comment){
+        html+=`<div style="font-size:11px;color:#888;margin-top:8px;padding:8px;background:#f8f8f8;border-radius:8px">${result.comment}</div>`;
+      }
+      document.getElementById('ai-foods-list').innerHTML=html;
+      document.getElementById('ai-total-kcal').textContent=result.total+' kcal';
+      document.getElementById('ai-total-row').style.display='flex';
+      document.getElementById('ai-add-wrap').style.display='block';
+
+      // 履歴に保存
+      const hist=JSON.parse(localStorage.getItem('aiHistory')||'[]');
+      hist.unshift({date:todayKey(),time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),foods:result.foods,total:result.total,img:e.target.result});
+      if(hist.length>10) hist.splice(10);
+      localStorage.setItem('aiHistory',JSON.stringify(hist));
+      updateAiHistory();
+
+    } catch(err){
+      document.getElementById('ai-loading-icon').style.display='none';
+      document.getElementById('ai-result-title').textContent='エラーが発生しました';
+      const msg=err.message||'不明なエラー';
+      let hint='';
+      if(msg.includes('quota')||msg.includes('exceeded')||msg.includes('RESOURCE_EXHAUSTED')){
+        hint='<br><br><b>対処法：</b><br>①新しいプロジェクトでAPIキーを再発行する<br>　→ aistudio.google.com で「Create API key in new project」<br>② Google Cloud Consoleで請求を有効化する';
+      } else if(msg.includes('not found')||msg.includes('not supported')){
+        hint='<br><br><b>対処法：</b><br>APIキーが正しく設定されているか確認してください。';
+      } else if(msg.includes('API_KEY_INVALID')||msg.includes('invalid')){
+        hint='<br><br><b>対処法：</b><br>APIキーが無効です。AI解析タブで正しいキーを再設定してください。';
+      }
+      document.getElementById('ai-foods-list').innerHTML=`<div style="color:#FF6B6B;font-size:12px;padding:8px;line-height:1.7">${msg}${hint}</div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function selAiMeal(t,btn){ aiMealType=t; document.querySelectorAll('[id^="ai-mt-"]').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+
+async function saveAiResult(){
+  if(!lastAiResult){ alert('解析結果がありません'); return; }
+  const u=getUser(); if(!u) return;
+  const mealNames=lastAiResult.foods.map(f=>f.name).join('・');
+  await set(ref(db,`users/${currentUserId}/mealLog/${todayKey()}/${aiMealType}`),{
+    name:mealNames.length>20?mealNames.slice(0,20)+'...':mealNames,
+    kcal:lastAiResult.total,
+    skipped:false
+  });
+  showToast('食事記録に追加しました ✓');
+  document.getElementById('ai-add-wrap').style.display='none';
+}
+
+function updateAiHistory(){
+  const hist=JSON.parse(localStorage.getItem('aiHistory')||'[]');
+  const el=document.getElementById('ai-history-list');
+  if(hist.length===0){ el.innerHTML='<div style="color:#aaa;font-size:13px;text-align:center;padding:16px">解析履歴がありません</div>'; return; }
+  el.innerHTML=hist.map(h=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.07)">
+      <img src="${h.img}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#222">${h.foods.slice(0,2).map(f=>f.name).join('・')}${h.foods.length>2?'など':''}</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px">${h.date} ${h.time}</div>
+      </div>
+      <div style="font-size:14px;font-weight:800;color:#FF6B6B">${h.total} kcal</div>
+    </div>`).join('');
+}
+
+// 公開
+window.go=go; window.openSwitch=openSwitch; window.closeSwitch=closeSwitch; window.openAdd=openAdd; window.closeForm=closeForm; window.saveUser=saveUser; window.saveWeight=saveWeight; window.saveMeal=saveMeal; window.saveExercise=saveExercise; window.selMeal=selMeal; window.selG=selG; window.selA=selA; window.swC=swC; window.toggleSkip=toggleSkip; window.proposeMeal=proposeMeal; window.proposeTonight=proposeTonight; window.toggleFast=toggleFast; window.setPreset=setPreset; window.updateSchedulePreview=updateSchedulePreview; window.saveSchedule=saveSchedule; window.calPrev=calPrev; window.calNext=calNext; window.saveGeminiKey=saveGeminiKey; window.triggerCamera=triggerCamera; window.analyzePhoto=analyzePhoto; window.selAiMeal=selAiMeal; window.saveAiResult=saveAiResult;
+
+initFastUI();
+initCalendar();
+</script>
+</body>
+</html>
