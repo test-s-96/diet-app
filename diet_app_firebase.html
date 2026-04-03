@@ -1120,10 +1120,13 @@ async function analyzePhoto(event){
     document.getElementById('photo-preview-wrap').style.display='block';
     document.getElementById('ai-result-wrap').style.display='block';
     document.getElementById('ai-result-title').textContent='AI解析中...';
+    document.getElementById('ai-result-title').style.color='#333';
     document.getElementById('ai-loading-icon').style.display='block';
     document.getElementById('ai-foods-list').innerHTML='';
     document.getElementById('ai-total-row').style.display='none';
     document.getElementById('ai-add-wrap').style.display='none';
+    document.getElementById('ai-total-kcal').textContent='— kcal';
+    lastAiResult=null;
 
     try {
       const prompt=`この料理の写真を見て、含まれている食材・料理を特定し、それぞれのカロリーを推定してください。
@@ -1160,6 +1163,8 @@ async function analyzePhoto(event){
       // 結果表示
       document.getElementById('ai-loading-icon').style.display='none';
       document.getElementById('ai-result-title').textContent='AI解析完了 ✨';
+      document.getElementById('ai-result-title').style.color='#333';
+      document.getElementById('ai-foods-list').innerHTML='';
       lastAiResult=result;
 
       let html='';
@@ -1267,9 +1272,14 @@ async function analyzeEufy(event){
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
       if(!text) throw new Error('APIから結果が返りませんでした');
       let clean=text.replace(/```json|```/g,'').trim();
-      const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
-      if(js===-1||je===-1) throw new Error('数値を読み取れませんでした');
-      const result=JSON.parse(clean.slice(js,je+1));
+      // まず直接パースを試みる
+      let result;
+      try{ result=JSON.parse(clean); }
+      catch(e){
+        const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
+        if(js===-1||je===-1) throw new Error('数値を読み取れませんでした');
+        result=JSON.parse(clean.slice(js,je+1));
+      }
       lastEufyResult=result;
       document.getElementById('eufy-loading-icon').style.display='none';
       document.getElementById('eufy-result-title').textContent='読み取り完了 ✨';
