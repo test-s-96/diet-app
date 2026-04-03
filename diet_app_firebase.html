@@ -1188,6 +1188,9 @@ async function analyzePhoto(event){
     } catch(err){
       document.getElementById('ai-loading-icon').style.display='none';
       document.getElementById('ai-result-title').textContent='エラーが発生しました';
+      document.getElementById('ai-result-title').style.color='#FF6B6B';
+      document.getElementById('ai-total-row').style.display='none';
+      document.getElementById('ai-add-wrap').style.display='none';
       const msg=err.message||'不明なエラー';
       let hint='';
       if(msg.includes('quota')||msg.includes('exceeded')||msg.includes('RESOURCE_EXHAUSTED')){
@@ -1268,7 +1271,7 @@ async function analyzeEufy(event){
       if(!text) throw new Error(data.error?.message||'APIから結果が返りませんでした');
       // 正規表現でJSONオブジェクトを抽出
       const jsonMatch=text.match(/\{[\s\S]*\}/);
-      if(!jsonMatch) throw new Error('JSON未検出（生テキスト長:'+text.length+'）');
+      if(!jsonMatch) throw new Error('AIの応答:「'+text+'」');
       let result;
       try{ result=JSON.parse(jsonMatch[0]); }
       catch(e){ throw new Error('パース失敗:'+jsonMatch[0].slice(0,80)); }
