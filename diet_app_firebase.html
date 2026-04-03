@@ -1149,15 +1149,12 @@ async function analyzePhoto(event){
       // candidatesがあれば成功扱い（quota警告と同時に結果が返ることがある）
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
       if(!text){ throw new Error(data.error?.message||'APIから結果が返りませんでした'); }
-      // 制御文字・見えない文字を除去してからJSON抽出
-      let clean=text.replace(/```json|```/g,'').replace(/[\u0000-\u001F\u007F\uFEFF\u200B]/g,'').trim();
-      const jsonStart=clean.indexOf('{');
-      const jsonEnd=clean.lastIndexOf('}');
-      if(jsonStart===-1||jsonEnd===-1) throw new Error('JSON未検出:'+clean.slice(0,50));
-      clean=clean.slice(jsonStart,jsonEnd+1);
+      // 正規表現でJSONオブジェクトを確実に抽出
+      const jsonMatch=text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('JSON未検出:'+text.slice(0,50));
       let result;
-      try{ result=JSON.parse(clean); }
-      catch(e){ throw new Error('パース失敗:'+clean.slice(0,80)); }
+      try{ result=JSON.parse(jsonMatch[0]); }
+      catch(e){ throw new Error('パース失敗:'+jsonMatch[0].slice(0,80)); }
       if(!result.foods||!Array.isArray(result.foods)) throw new Error('foods未検出:'+JSON.stringify(result).slice(0,80));
 
       // 結果表示
@@ -1269,17 +1266,12 @@ async function analyzeEufy(event){
       const data=await res.json();
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
       if(!text) throw new Error(data.error?.message||'APIから結果が返りませんでした');
-      // 制御文字・見えない文字を除去してからパース
-      let clean=text.replace(/```json|```/g,'').replace(/[\u0000-\u001F\u007F\uFEFF\u200B]/g,'').trim();
+      // 正規表現でJSONオブジェクトを抽出
+      const jsonMatch=text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('JSON未検出（生テキスト長:'+text.length+'）');
       let result;
-      try{ result=JSON.parse(clean); }
-      catch(e){
-        // { }の範囲を探して再試行
-        const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
-        if(js===-1||je===-1) throw new Error('JSON未検出:'+clean.slice(0,60));
-        try{ result=JSON.parse(clean.slice(js,je+1)); }
-        catch(e2){ throw new Error('パース失敗:'+clean.slice(js,js+80)); }
-      }
+      try{ result=JSON.parse(jsonMatch[0]); }
+      catch(e){ throw new Error('パース失敗:'+jsonMatch[0].slice(0,80)); }
       lastEufyResult=result;
       document.getElementById('eufy-loading-icon').style.display='none';
       document.getElementById('eufy-result-title').textContent='読み取り完了 ✨';
