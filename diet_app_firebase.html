@@ -1110,51 +1110,25 @@ async function analyzePhoto(event){
   const file=event.target.files[0]; if(!file) return;
   const key=localStorage.getItem('geminiKey'); if(!key){ alert('APIキーが設定されていません。'); return; }
 
-  // 画像を圧縮してからAPIに送る
-  function compressImage(file, maxSize=512, quality=0.5){
-    return new Promise(resolve=>{
-      const img=new Image();
-      const url=URL.createObjectURL(file);
-      img.onload=()=>{
-        const canvas=document.createElement('canvas');
-        let w=img.width, h=img.height;
-        if(w>maxSize||h>maxSize){
-          if(w>h){ h=Math.round(h*maxSize/w); w=maxSize; }
-          else{ w=Math.round(w*maxSize/h); h=maxSize; }
-        }
-        canvas.width=w; canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        const dataUrl=canvas.toDataURL('image/jpeg',quality);
-        URL.revokeObjectURL(url);
-        resolve({base64:dataUrl.split(',')[1], mimeType:'image/jpeg'});
-      };
-      img.src=url;
-    });
-  }
-
   // プレビュー表示
   const reader=new FileReader();
   reader.onload=async(e)=>{
-    // 圧縮実行
-    const compressed=await compressImage(file);
-    const base64=compressed.base64;
-    const mimeType=compressed.mimeType;
+    const base64=e.target.result.split(',')[1];
+    const mimeType=file.type;
 
-    // 前回の結果・エラーを完全にリセット
     document.getElementById('photo-preview').src=e.target.result;
     document.getElementById('photo-preview-wrap').style.display='block';
     document.getElementById('ai-result-wrap').style.display='block';
     document.getElementById('ai-result-title').textContent='AI解析中...';
-    document.getElementById('ai-result-title').style.color='#333';
     document.getElementById('ai-loading-icon').style.display='block';
     document.getElementById('ai-foods-list').innerHTML='';
     document.getElementById('ai-total-row').style.display='none';
     document.getElementById('ai-add-wrap').style.display='none';
-    document.getElementById('ai-total-kcal').textContent='— kcal';
-    lastAiResult=null;
 
     try {
-      const prompt=`この画像の料理を分析してカロリーを計算してください。必ずJSON形式のみで回答してください。他のテキストは不要です。形式:{"foods":[{"name":"食品名","kcal":カロリー数値}],"total":合計カロリー数値,"comment":"コメント"}`;
+      const prompt=`この料理の写真を見て、含まれている食材・料理を特定し、それぞれのカロリーを推定してください。
+以下のJSON形式のみで回答してください（他のテキストは一切不要）：
+{"foods":[{"name":"食品名","kcal":カロリー数値},...],"total":合計カロリー数値,"comment":"一言コメント"}`;
 
       const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
         method:'POST',
@@ -1164,50 +1138,24 @@ async function analyzePhoto(event){
             {inline_data:{mime_type:mimeType,data:base64}},
             {text:prompt}
           ]}],
-          generationConfig:{temperature:0.1,maxOutputTokens:800}
+          generationConfig:{temperature:0.1,maxOutputTokens:1000}
         })
       });
 
+      if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'APIエラー'); }
       const data=await res.json();
-      // デバッグ：生の応答を確認
-      const rawText=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      const finishReason=data.candidates?.[0]?.finishReason||'';
-      const errMsg=data.error?.message||'';
-      if(!rawText && errMsg){ throw new Error(errMsg); }
-      if(!rawText){ throw new Error('空の応答（finishReason:'+finishReason+'）'); }
-
-      // JSON部分を安全に抽出・パース
-      let clean=rawText.replace(/```json|```/g,'').trim();
-      // まずそのままパースを試みる
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      // JSON部分だけを安全に抽出
+      let clean=text.replace(/```json|```/g,'').trim();
+      // { } の範囲だけを抽出
+      const jsonStart=clean.indexOf('{');
+      const jsonEnd=clean.lastIndexOf('}');
+      if(jsonStart===-1||jsonEnd===-1) throw new Error('AIの応答からJSONを取得できませんでした。もう一度お試しください。');
+      clean=clean.slice(jsonStart,jsonEnd+1);
       let result;
-      try{
-        result=JSON.parse(clean);
-      }catch(e1){
-        // { } の対応を追跡して正確に抽出
-        let depth=0, jStart=-1, jEnd=-1;
-        for(let i=0;i<clean.length;i++){
-          if(clean[i]==='{'){if(depth===0)jStart=i;depth++;}
-          else if(clean[i]==='}'){depth--;if(depth===0){jEnd=i;break;}}
-        }
-        if(jStart!==-1&&jEnd!==-1){
-          try{ result=JSON.parse(clean.slice(jStart,jEnd+1)); }catch(e2){}
-        }
-        // フォールバック：正規表現でname/kcalを抽出
-        if(!result){
-          const foodMatches=[...clean.matchAll(/"name"\s*:\s*"([^"]+)"\s*,\s*"kcal"\s*:\s*(\d+)/g)];
-          if(foodMatches.length>0){
-            const foods=foodMatches.map(m=>({name:m[1],kcal:parseInt(m[2])}));
-            const totalMatch=clean.match(/"total"\s*:\s*(\d+)/);
-            const total=totalMatch?parseInt(totalMatch[1]):foods.reduce((a,f)=>a+f.kcal,0);
-            result={foods,total,comment:''};
-          }
-        }
-        if(!result) throw new Error('解析失敗。AIの応答:'+clean.slice(0,60));
-      }
-      if(!result.foods||!Array.isArray(result.foods)||result.foods.length===0){
-        if(result.total){ result.foods=[{name:'料理',kcal:result.total}]; }
-        else throw new Error('解析結果が空です。もう一度試してください。');
-      }
+      try{ result=JSON.parse(clean); }
+      catch(e){ throw new Error('AI応答のJSON解析に失敗しました。もう一度試してください。'); }
+      if(!result.foods||!Array.isArray(result.foods)) throw new Error('AI応答の形式が不正です。もう一度試してください。');
 
       // 結果表示
       document.getElementById('ai-loading-icon').style.display='none';
@@ -1239,14 +1187,10 @@ async function analyzePhoto(event){
     } catch(err){
       document.getElementById('ai-loading-icon').style.display='none';
       document.getElementById('ai-result-title').textContent='エラーが発生しました';
-      document.getElementById('ai-result-title').style.color='#FF6B6B';
-      // エラー時は前回の成功結果を隠す
-      document.getElementById('ai-total-row').style.display='none';
-      document.getElementById('ai-add-wrap').style.display='none';
       const msg=err.message||'不明なエラー';
       let hint='';
       if(msg.includes('quota')||msg.includes('exceeded')||msg.includes('RESOURCE_EXHAUSTED')){
-        hint='<br><br><b>対処法：</b><br>①新しいプロジェクトでAPIキーを再発行<br>　→ aistudio.google.com で「Create API key in new project」<br>② Google Cloud Consoleで請求を有効化する';
+        hint='<br><br><b>対処法：</b><br>①新しいプロジェクトでAPIキーを再発行する<br>　→ aistudio.google.com で「Create API key in new project」<br>② Google Cloud Consoleで請求を有効化する';
       } else if(msg.includes('not found')||msg.includes('not supported')){
         hint='<br><br><b>対処法：</b><br>APIキーが正しく設定されているか確認してください。';
       } else if(msg.includes('API_KEY_INVALID')||msg.includes('invalid')){
@@ -1316,17 +1260,16 @@ async function analyzeEufy(event){
       const prompt=`このスマート体重計アプリの計測結果画面から数値を読み取ってください。以下のJSON形式のみで回答（存在しない項目はnull）：{"weight":体重kg,"bodyFat":体脂肪率%,"bmi":BMI,"muscleMass":筋肉量kg,"boneMass":骨量kg,"water":体水分率%,"bmr":基礎代謝kcal,"visceralFat":内臓脂肪レベル,"bodyAge":体年齢}`;
       const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mimeType,data:base64}},{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:800}})
+        body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mimeType,data:base64}},{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:500}})
       });
+      if(!res.ok){ const err=await res.json(); throw new Error(err.error?.message||'APIエラー'); }
       const data=await res.json();
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text) throw new Error(data.error?.message||'APIから結果が返りませんでした');
+      if(!text) throw new Error('APIから結果が返りませんでした');
       let clean=text.replace(/```json|```/g,'').trim();
       const js=clean.indexOf('{'), je=clean.lastIndexOf('}');
-      if(js===-1||je===-1) throw new Error('スクリーンショットから数値を読み取れませんでした');
-      let result;
-      try{ result=JSON.parse(clean.slice(js,je+1)); }
-      catch(e){ throw new Error('JSON解析に失敗しました。もう一度試してください'); }
+      if(js===-1||je===-1) throw new Error('数値を読み取れませんでした');
+      const result=JSON.parse(clean.slice(js,je+1));
       lastEufyResult=result;
       document.getElementById('eufy-loading-icon').style.display='none';
       document.getElementById('eufy-result-title').textContent='読み取り完了 ✨';
@@ -1335,7 +1278,7 @@ async function analyzeEufy(event){
       Object.entries(labels).forEach(([k,v])=>{
         if(result[k]!=null){hasData=true;html+=`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px"><span style="color:#555;font-weight:600">${v.l}</span><span style="font-weight:800;color:${v.c}">${result[k]}${v.u}</span></div>`;}
       });
-      if(!hasData) html='<div style="color:#aaa;font-size:13px;padding:8px">数値を読み取れませんでした。eufyLifeの計測結果画面をお試しください。</div>';
+      if(!hasData) html='<div style="color:#aaa;font-size:13px;padding:8px">数値を読み取れませんでした。</div>';
       document.getElementById('eufy-data-list').innerHTML=html;
       if(hasData) document.getElementById('eufy-save-wrap').style.display='block';
     } catch(err){
